@@ -10,9 +10,15 @@
     "test": "jest"
   },
   "dependencies": {
+    "@lionralfs/discogs-client": "^4.1.3",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native/new-app-screen": "0.80.1",
+    "crypto-js": "^4.2.0",
     "react": "19.1.0",
     "react-native": "0.80.1",
+    "react-native-app-auth": "^8.0.3",
+    "react-native-dotenv": "^3.4.11",
+    "react-native-keychain": "^10.0.0",
     "react-native-sqlite-storage": "^6.0.1"
   },
   "devDependencies": {
