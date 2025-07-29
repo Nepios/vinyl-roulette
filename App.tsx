@@ -94,8 +94,8 @@ function App() {
       
       {/* Login Section */}
       <SimpleDiscogsLogin
-        consumerKey={CONSUMER_KEY || 'YOUR_CONSUMER_KEY'}
-        consumerSecret={CONSUMER_SECRET || 'YOUR_CONSUMER_SECRET'}
+        consumerKey={CONSUMER_KEY}
+        consumerSecret={CONSUMER_SECRET}
         onLoginSuccess={handleAuthChange}
         onLoginError={handleAuthError}
       />
