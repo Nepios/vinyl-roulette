@@ -52,7 +52,7 @@ function App() {
       const response = await fetch(url, {
         headers: {
           'User-Agent': 'VinylRoulette/1.0 +https://github.com/yourapp',
-          'Authorization': authHeader || `Discogs key=${CONSUMER_KEY}, secret=${CONSUMER_SECRET}`
+          'Authorization': authHeader || `Discogs key=${CONSUMER_KEY}`
         }
       });
       
