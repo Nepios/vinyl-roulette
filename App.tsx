@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import SimpleDiscogsLogin from './components/SimpleDiscogsLogin';
 import SimpleDiscogsOAuth from './services/SimpleDiscogsOAuth';
+import { DISCOGS_CONSUMER_KEY, DISCOGS_CONSUMER_SECRET } from '@env';
 
 interface DiscogsRelease {
   id: number;
@@ -13,9 +14,16 @@ interface DiscogsRelease {
   thumb: string;
 }
 
-// Replace with your actual keys
-const CONSUMER_KEY = process.env.DISCOGS_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET;
+// Use environment variables from .env file
+const CONSUMER_KEY = DISCOGS_CONSUMER_KEY;
+const CONSUMER_SECRET = DISCOGS_CONSUMER_SECRET;
+
+// Debug environment variables
+console.log('Environment variables loaded:');
+console.log('CONSUMER_KEY exists:', !!CONSUMER_KEY);
+console.log('CONSUMER_SECRET exists:', !!CONSUMER_SECRET);
+console.log('CONSUMER_KEY length:', CONSUMER_KEY?.length || 0);
+console.log('CONSUMER_SECRET length:', CONSUMER_SECRET?.length || 0);
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -84,8 +92,14 @@ function App() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.mainContainer}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+      >
       
       <View style={styles.header}>
         <Text style={styles.title}>VinylRoulette</Text>
@@ -147,14 +161,22 @@ function App() {
           ))}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  container: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   header: {
     padding: 20,
