@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, ActivityIndicator } from 'react-native';
+import { StatusBar, StyleSheet, useColorScheme, View, Text, TouchableOpacity, Alert, TextInput, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
 import SimpleDiscogsLogin from './components/SimpleDiscogsLogin';
 import SimpleDiscogsOAuth from './services/SimpleDiscogsOAuth';
+import { DISCOGS_CONSUMER_KEY, DISCOGS_CONSUMER_SECRET } from '@env';
 
 interface DiscogsRelease {
   id: number;
@@ -13,9 +14,9 @@ interface DiscogsRelease {
   thumb: string;
 }
 
-// Replace with your actual keys
-const CONSUMER_KEY = process.env.DISCOGS_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET;
+// Use imported environment variables
+const CONSUMER_KEY = DISCOGS_CONSUMER_KEY;
+const CONSUMER_SECRET = DISCOGS_CONSUMER_SECRET;
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -46,7 +47,7 @@ function App() {
       // Get the appropriate auth header
       const authHeader = await oauthService.getAuthHeader();
       
-      const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(searchQuery)}&type=release&per_page=10`;
+      const url = `https://api.discogs.com/database/search?q=${encodeURIComponent(searchQuery)}&type=release&per_page=50`;
       console.log('Request URL:', url);
       
       const response = await fetch(url, {
@@ -84,75 +85,81 @@ function App() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.mainContainer}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       
-      <View style={styles.header}>
-        <Text style={styles.title}>VinylRoulette</Text>
-        <Text style={styles.subtitle}>Search Discogs Database</Text>
-      </View>
-      
-      {/* Login Section */}
-      <SimpleDiscogsLogin
-        consumerKey={CONSUMER_KEY}
-        consumerSecret={CONSUMER_SECRET}
-        onLoginSuccess={handleAuthChange}
-        onLoginError={handleAuthError}
-      />
-      
-      <View style={styles.searchSection}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search for albums, artists, or labels..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={searchDiscogs}
+      <ScrollView 
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>VinylRoulette</Text>
+          <Text style={styles.subtitle}>Search Discogs Database</Text>
+        </View>
+        
+        {/* Login Section */}
+        <SimpleDiscogsLogin
+          consumerKey={CONSUMER_KEY}
+          consumerSecret={CONSUMER_SECRET}
+          onLoginSuccess={handleAuthChange}
+          onLoginError={handleAuthError}
         />
         
-        <TouchableOpacity 
-          style={styles.searchButton} 
-          onPress={searchDiscogs}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>Search</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-      
-      {releases.length > 0 && (
-        <View style={styles.resultsSection}>
-          <Text style={styles.resultsTitle}>Search Results ({releases.length})</Text>
+        <View style={styles.searchSection}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search for albums, artists, or labels..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={searchDiscogs}
+          />
           
-          {releases.map((release) => (
-            <View key={release.id} style={styles.releaseItem}>
-              <Text style={styles.releaseTitle}>{release.title}</Text>
-              <Text style={styles.releaseInfo}>
-                {release.year ? `${release.year} • ` : ''}
-                {release.country || 'Unknown Country'}
-              </Text>
-              {release.label && release.label.length > 0 && (
-                <Text style={styles.releaseLabel}>
-                  Label: {release.label.join(', ')}
-                </Text>
-              )}
-              {release.genre && release.genre.length > 0 && (
-                <Text style={styles.releaseGenre}>
-                  Genre: {release.genre.join(', ')}
-                </Text>
-              )}
-            </View>
-          ))}
+          <TouchableOpacity 
+            style={styles.searchButton} 
+            onPress={searchDiscogs}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text style={styles.buttonText}>Search</Text>
+            )}
+          </TouchableOpacity>
         </View>
-      )}
-    </ScrollView>
+        
+        {releases.length > 0 && (
+          <View style={styles.resultsSection}>
+            <Text style={styles.resultsTitle}>Search Results ({releases.length})</Text>
+            
+            {releases.map((release) => (
+              <View key={release.id} style={styles.releaseItem}>
+                <Text style={styles.releaseTitle}>{release.title}</Text>
+                <Text style={styles.releaseInfo}>
+                  {release.year ? `${release.year} • ` : ''}
+                  {release.country || 'Unknown Country'}
+                </Text>
+                {release.label && release.label.length > 0 && (
+                  <Text style={styles.releaseLabel}>
+                    Label: {release.label.join(', ')}
+                  </Text>
+                )}
+                {release.genre && release.genre.length > 0 && (
+                  <Text style={styles.releaseGenre}>
+                    Genre: {release.genre.join(', ')}
+                  </Text>
+                )}
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
