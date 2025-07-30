@@ -72,8 +72,8 @@ class SimpleDiscogsOAuth {
       return `Discogs token=${token}`;
     }
     
-    // Fallback to consumer key/secret for basic requests
-    return `Discogs key=${this.consumerKey}, secret=${this.consumerSecret}`;
+    // Fallback to consumer key for basic requests
+    return `Discogs key=${this.consumerKey}`;
   }
 }
 
