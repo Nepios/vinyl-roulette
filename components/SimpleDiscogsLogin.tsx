@@ -189,6 +189,7 @@ const SimpleDiscogsLogin: React.FC<SimpleDiscogsLoginProps> = ({
               multiline
               autoCorrect={false}
               autoCapitalize="none"
+              secureTextEntry={true}
             />
             
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveToken}>

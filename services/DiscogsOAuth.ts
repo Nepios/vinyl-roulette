@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CryptoJS from 'crypto-js';
+import { v4 as uuidv4 } from 'uuid';
 
 interface DiscogsTokens {
   accessToken: string;
@@ -149,7 +150,7 @@ class DiscogsOAuth {
   }
 
   private generateNonce(): string {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return uuidv4().replace(/-/g, '');
   }
 
   private generateSignature(method: string, url: string, params: Record<string, string>, tokenSecret?: string): string {

@@ -7,13 +7,16 @@ interface DiscogsTokens {
 
 // Create a function to initialize client with tokens
 function createDiscogsClient(tokens?: DiscogsTokens): DiscogsClient {
+  if (!process.env.DISCOGS_CONSUMER_KEY || !process.env.DISCOGS_CONSUMER_SECRET) {
+    throw new Error('Missing required environment variables: DISCOGS_CONSUMER_KEY and/or DISCOGS_CONSUMER_SECRET');
+  }
   if (tokens) {
     return new DiscogsClient({
       userAgent: 'VinylRoulette/1.0 +https://github.com/Nepios/vinyl-roulette',
       auth: {
         method: 'oauth',
-        consumerKey: process.env.DISCOGS_CONSUMER_KEY || '',
-        consumerSecret: process.env.DISCOGS_CONSUMER_SECRET || '',
+        consumerKey: process.env.DISCOGS_CONSUMER_KEY,
+        consumerSecret: process.env.DISCOGS_CONSUMER_SECRET,
         accessToken: tokens.accessToken,
         accessTokenSecret: tokens.accessTokenSecret,
       }
