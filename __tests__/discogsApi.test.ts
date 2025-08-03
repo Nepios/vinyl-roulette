@@ -250,15 +250,14 @@ describe('discogsApi', () => {
 
       // Assert
       const headers = mockedAxios.get.mock.calls[0][1]?.headers;
-      const callArgs = mockedAxios.get.mock.calls[0];
       expect(headers).toHaveProperty('Authorization');
       expect(headers?.Authorization).toMatch(/^OAuth/);
       expect(headers?.Authorization).toContain('oauth_consumer_key');
       expect(headers?.Authorization).toContain('oauth_token');
       expect(headers?.Authorization).toContain('oauth_signature');
 
-      expect(callArgs[1]).toHaveProperty('headers');
-      expect(callArgs[1]?.headers).toEqual(expect.any(Object));
+      expect(mockedAxios.get.mock.calls[0][1]).toHaveProperty('headers');
+      expect(mockedAxios.get.mock.calls[0][1]?.headers).toEqual(expect.any(Object));
     });
   });
 });
