@@ -21,7 +21,7 @@ const AppNavigator = () => {
   // Show loading screen while checking authorization
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.loadingContainer} testID="loading-container">
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     )

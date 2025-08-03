@@ -9,7 +9,7 @@ const LandingPage = () => {
   const { isAuthorized, refreshAuth } = useAuthContext();
 
   React.useEffect(() => {
-    if (!isAuthorized) {
+    if (isAuthorized === false) {
       navigation.navigate('Login');
     }
   }, [isAuthorized, navigation]);
