@@ -53,10 +53,10 @@
 		<array>
 				<dict>
 						<key>CFBundleURLName</key>
-						<string>com.vinylroulette</string>
+						<string>vinylroulette</string>
 						<key>CFBundleURLSchemes</key>
 						<array>
-								<string>com.vinylroulette</string>
+								<string>vinylroulette</string>
 						</array>
 				</dict>
 		</array>

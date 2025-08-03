@@ -1,0 +1,20 @@
+(node:45175) ExperimentalWarning: CommonJS module /Users/rachelhanna/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/rachelhanna/.nvm/versions/node/v23.3.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+warn Package react-native-sqlite-storage contains invalid configuration: "dependency.platforms.ios.project" is not allowed. Please verify it's properly linked using "npx react-native config" command and contact the package maintainers about this.
+
+Welcome to React Native v0.80
+Starting dev server on http://localhost:8081
+
+error listen EADDRINUSE: address already in use :::8081.
+Error: listen EADDRINUSE: address already in use :::8081
+    at Server.setupListenHandle [as _listen2] (node:net:1912:16)
+    at listenInCluster (node:net:1969:12)
+    at Server.listen (node:net:2074:7)
+    at /Users/rachelhanna/code-personal/VinylRoulette/node_modules/metro/src/index.flow.js:358:14
+    at new Promise (<anonymous>)
+    at earlyPortCheck (/Users/rachelhanna/code-personal/VinylRoulette/node_modules/metro/src/index.flow.js:354:11)
+    at exports.runServer (/Users/rachelhanna/code-personal/VinylRoulette/node_modules/metro/src/index.flow.js:128:9)
+    at Object.runServer [as func] (/Users/rachelhanna/code-personal/VinylRoulette/node_modules/@react-native/community-cli-plugin/dist/commands/start/runServer.js:147:47)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Command.handleAction (/Users/rachelhanna/code-personal/VinylRoulette/node_modules/@react-native-community/cli/build/index.js:139:9)
