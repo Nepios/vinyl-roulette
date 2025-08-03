@@ -8,6 +8,8 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App'; 
 import { fetchUserIdentity } from '../services/discogsApi'
+import { useAuthContext } from '../contexts/AuthContext'
+import { clearAllEncryptedStorage, debugStorage } from '../utils/debugUtils'
 
 // Store request secret outside of component to avoid state issues
 let globalRequestSecret: string | null = null
@@ -16,6 +18,7 @@ const DiscogsLoginScreen = () => {
   const [loading, setLoading] = useState(false)
   const [requestSecret, setRequestSecret] = useState<string | null>(null)
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { refreshAuth } = useAuthContext()
 
   // Function to handle OAuth callback URL from InAppBrowser
   const handleOAuthCallback = async (callbackUrl: string) => {
@@ -47,11 +50,15 @@ const DiscogsLoginScreen = () => {
       globalRequestSecret = null
       setRequestSecret(null)
       
+      // Refresh the auth context to update the app state
+      refreshAuth()
+      
       try {
         const identity = await fetchUserIdentity()
         navigation.navigate('Collection', { username: identity.username })
       } catch (identityError) {
-        Alert.alert('Success!', 'Logged in successfully! Please restart the app to view your collection.')
+        // If we can't get identity immediately, the auth refresh will handle the navigation
+        console.log('Token stored, auth will be refreshed automatically')
       }
     } catch (err) {
       console.error('InAppBrowser OAuth callback handling error:', err)
@@ -103,10 +110,31 @@ const DiscogsLoginScreen = () => {
     }
   }
 
+  const handleClearStorage = async () => {
+    const success = await clearAllEncryptedStorage()
+    if (success) {
+      refreshAuth()
+      Alert.alert('Success', 'All encrypted storage cleared!')
+    } else {
+      Alert.alert('Error', 'Failed to clear encrypted storage')
+    }
+  }
+
+  const handleDebugStorage = async () => {
+    await debugStorage()
+    Alert.alert('Debug', 'Check console for storage debug info')
+  }
+
   return (
     <View style={styles.container}>
       <Button title="Login with Discogs" onPress={handleLogin} disabled={loading} />
       {loading && <ActivityIndicator style={styles.loader} />}
+      
+      {/* Debug buttons - remove these in production */}
+      <View style={styles.debugContainer}>
+        <Button title="Debug Storage" onPress={handleDebugStorage} color="orange" />
+        <Button title="Clear All Storage" onPress={handleClearStorage} color="red" />
+      </View>
     </View>
   )
 }
@@ -119,6 +147,10 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 20,
+  },
+  debugContainer: {
+    marginTop: 40,
+    gap: 10,
   },
 })
 

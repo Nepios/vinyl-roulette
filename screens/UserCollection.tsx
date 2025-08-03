@@ -6,22 +6,48 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  Button,
 } from 'react-native'
 import { fetchUserCollection, CollectionRelease } from '../services/discogsApi'
-import { RouteProp, useRoute } from '@react-navigation/native'
-
-type RootStackParamList = {
-  Collection: { username: string }
-}
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { clearDiscogsToken } from '../services/auth/tokenStorage'
+import { useAuthContext } from '../contexts/AuthContext'
+import { RootStackParamList } from '../App'
 
 type CollectionScreenRouteProp = RouteProp<RootStackParamList, 'Collection'>
-
 
 const UserCollection = () => {
   const [releases, setReleases] = useState<CollectionRelease[]>([])
   const [loading, setLoading] = useState(true)
   const route = useRoute<CollectionScreenRouteProp>()
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+  const { refreshAuth } = useAuthContext()
   const username = route.params?.username
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await clearDiscogsToken()
+              refreshAuth()
+              navigation.navigate('Login')
+            } catch (error) {
+              console.error('Error during logout:', error)
+              Alert.alert('Error', 'Could not logout properly')
+            }
+          }
+        }
+      ]
+    )
+  }
 
   useEffect(() => {
     const load = async () => {
