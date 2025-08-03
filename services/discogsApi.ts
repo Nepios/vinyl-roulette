@@ -49,7 +49,7 @@ export const fetchUserCollection = async (username: string): Promise<CollectionR
     headers: { ...headers },
   })
 
-  return response.data.releases
+  return response.data.releases || []
 }
 
 export const fetchUserIdentity = async (): Promise<{ username: string }> => {

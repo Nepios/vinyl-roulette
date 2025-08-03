@@ -185,7 +185,8 @@ describe('discogsApi', () => {
         mockedAxios.get.mockResolvedValue({ data: {} }); // Missing releases
 
         const result = await fetchUserCollection('testuser');
-        expect(result).toBeUndefined(); // Function returns data.releases which is undefined
+        // expect(result).toBeUndefined(); // Function returns data.releases which is undefined
+        expect(result).toEqual([]); // Should return empty array when releases is missing
       });
     });
   });
