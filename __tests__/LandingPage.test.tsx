@@ -77,7 +77,7 @@ describe('LandingPage', () => {
         collectionButton.props.onPress();
       });
       
-      expect(mockNavigate).toHaveBeenCalledWith('Collection');
+      expect(mockNavigate).toHaveBeenCalledWith('Collection', { username: 'testuser' });
     });
   });
 

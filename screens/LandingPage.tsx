@@ -1,12 +1,15 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 
 const LandingPage = () => {
-  const navigation = useNavigation();
-  const { isAuthorized, refreshAuth } = useAuthContext();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isAuthorized, refreshAuth, username } = useAuthContext();
+
 
   React.useEffect(() => {
     if (isAuthorized === false) {
@@ -27,7 +30,7 @@ const LandingPage = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Landing Page</Text>
-      <Button title="Go to My Collection" onPress={() => navigation.navigate('Collection')} />
+      <Button title="Go to My Collection" onPress={() => navigation.navigate('Collection', { username })} />
       <Button title="Clear Tokens" onPress={handleClearTokens} />
     </View>
   );
