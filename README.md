@@ -1,3 +1,6 @@
+VinylRoulette is a React Native mobile app that allows the user to import their record collection from Discogs and then randomly select a record from their collection to get inspiration for what to listen to next.  This is a work in progress coded by me and using Copilot as the code review. More details will be added as the project progresses.
+Below is the basic info about how to spin up the app.
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
