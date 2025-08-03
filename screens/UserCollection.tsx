@@ -21,7 +21,7 @@ const UserCollection = () => {
   const [releases, setReleases] = useState<CollectionRelease[]>([])
   const [loading, setLoading] = useState(true)
   const route = useRoute<CollectionScreenRouteProp>()
-  const username = route.params.username
+  const username = route.params?.username
 
   useEffect(() => {
     const load = async () => {
@@ -37,7 +37,18 @@ const UserCollection = () => {
     }
 
     load()
-  }, [])
+  }, [username])
+
+  if (!username) {
+    return (
+      <View style={styles.loader}>
+        <Text style={styles.noUserText}>
+          Error: Missing username parameter.
+        </Text>
+      </View>
+    )
+  }
+
 
   const renderItem = ({ item }: { item: CollectionRelease }) => {
     const info = item.basic_information
@@ -88,6 +99,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 14,
     color: '#555',
+  },
+  noUserText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20
   },
 })
 
