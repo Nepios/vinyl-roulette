@@ -28,6 +28,8 @@ export interface CollectionRelease {
     cover_image?: string
     thumb?: string
     resource_url: string
+    genres?: string[]
+    styles?: string[]
   }
 }
 
@@ -36,26 +38,43 @@ export const fetchUserCollection = async (username: string): Promise<CollectionR
   if (!token) throw new Error('No access token found')
   const folder_id = 0 // 0 is the "All" folder
 
-  const url = `https://api.discogs.com/users/${username}/collection/folders/${folder_id}/releases`
+  const baseUrl = `https://api.discogs.com/users/${username}/collection/folders/${folder_id}/releases`
+  let allReleases: CollectionRelease[] = []
+  let page = 1
+  let hasMorePages = true
 
-  const requestData = {
-    url,
-    method: 'GET',
-    parameters: { sort: 'title', sort_order: 'asc'},
-  }
+  while (hasMorePages) {
+    const requestData = {
+      url: baseUrl,
+      method: 'GET',
+      parameters: { sort: 'title', sort_order: 'asc', per_page: '100', page: page.toString() },
+    }
 
-  const headers = oauth.toHeader(
-    oauth.authorize(requestData, {
-      key: token.oauth_token,
-      secret: token.oauth_token_secret,
+    const headers = oauth.toHeader(
+      oauth.authorize(requestData, {
+        key: token.oauth_token,
+        secret: token.oauth_token_secret,
+      })
+    )
+
+    const response = await axios.get<{ releases: CollectionRelease[], pagination: { pages: number, page: number, per_page: number, items: number } }>(baseUrl, {
+      headers: { ...headers },
+      params: { sort: 'title', sort_order: 'asc', per_page: '100', page: page.toString() }
     })
-  )
 
-  const response = await axios.get<{ releases: CollectionRelease[] }>(url, {
-    headers: { ...headers },
-  })
-  console.log('Fetched releases response:', response.data.releases.slice(0, 3)) // Log first 3 releases for debugging
-  return response.data.releases || []
+    const releases = response.data.releases || []
+    allReleases = allReleases.concat(releases)
+    
+    const pagination = response.data.pagination
+    hasMorePages = pagination && page < pagination.pages
+    page++
+    
+    // Add a small delay to be respectful to the API
+    if (hasMorePages) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+  }
+  return allReleases
 }
 
 export const fetchUserIdentity = async (): Promise<{ username: string }> => {

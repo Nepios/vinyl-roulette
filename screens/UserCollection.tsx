@@ -99,7 +99,6 @@ const UserCollection = () => {
 
   const renderItem = ({ item }: { item: Record }) => {
     if (!item) return null;
-
     return (
       <View style={styles.item}>
         <Text style={styles.title}>

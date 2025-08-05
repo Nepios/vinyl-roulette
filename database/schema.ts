@@ -7,7 +7,10 @@ CREATE TABLE IF NOT EXISTS records (
   artists TEXT,
   year INTEGER,
   thumbnail TEXT,
-  resource_url TEXT
+  resource_url TEXT,
+  cover_image TEXT,
+  genres TEXT,
+  styles TEXT
 )`;
 
 export const createMetadataTable = `
@@ -16,5 +19,4 @@ CREATE TABLE IF NOT EXISTS metadata (
   value TEXT
 )`;
 
-// For backward compatibility
 export const createTables = [createRecordsTable, createMetadataTable];
