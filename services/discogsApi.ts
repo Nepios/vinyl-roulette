@@ -20,22 +20,28 @@ const oauth = new OAuth({
 
 export interface CollectionRelease {
   id: number
+  date_added?: string
   basic_information: {
     title: string
     year: number
     artists: { name: string }[]
+    cover_image?: string
+    thumb?: string
+    resource_url: string
   }
 }
 
 export const fetchUserCollection = async (username: string): Promise<CollectionRelease[]> => {
   const token = await getDiscogsToken()
   if (!token) throw new Error('No access token found')
+  const folder_id = 0 // 0 is the "All" folder
 
-  const url = `https://api.discogs.com/users/${username}/collection/folders/0/releases`
+  const url = `https://api.discogs.com/users/${username}/collection/folders/${folder_id}/releases`
 
   const requestData = {
     url,
     method: 'GET',
+    // parameters: { sort: 'ta', sort_order: 'descending' },
   }
 
   const headers = oauth.toHeader(
@@ -48,7 +54,7 @@ export const fetchUserCollection = async (username: string): Promise<CollectionR
   const response = await axios.get<{ releases: CollectionRelease[] }>(url, {
     headers: { ...headers },
   })
-
+  console.log('Fetched releases response:', response.data)
   return response.data.releases || []
 }
 
