@@ -1,5 +1,5 @@
-import { getLastSyncTime, updateLastSyncTime, saveRecords, getAllRecords } from './collectionService';
-import { CollectionRelease, fetchUserCollection} from '../services/discogsApi'; // Your remote fetcher
+import { getLastSyncTime, updateLastSyncTime, saveRecords } from './collectionService';
+import { CollectionRelease, fetchUserCollection} from '../services/discogsApi';
 
 const SYNC_INTERVAL_MS = 1000 * 60 * 60; // 1 hour
 
@@ -10,7 +10,7 @@ export const syncIfStale = async (username: string, force = false): Promise<'fet
 
   if (isStale || force) {
     const records: CollectionRelease[] = await fetchUserCollection(username);
-    saveRecords(records);
+    await saveRecords(records);
     updateLastSyncTime(now);
     return 'fetched';
   } else {

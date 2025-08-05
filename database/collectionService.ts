@@ -2,13 +2,26 @@ import { getDB } from './database';
 import { CollectionRelease } from '../services/discogsApi';
 import { Record } from '../screens/UserCollection';
 
-export const saveRecords = (records: CollectionRelease[]) => {
+export const saveRecords = async (records: CollectionRelease[]) => {
   const db = getDB();
   db.transaction((tx) => {
     for (const rec of records) {
-      tx.executeSql(
-        `INSERT OR REPLACE INTO records (id, discogs_id, title, artists, year, thumbnail, resource_url, date_added, genres, styles, cover_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [null, rec.id, rec.basic_information.title, JSON.stringify(rec.basic_information.artists), rec.basic_information.year, rec.basic_information.thumb, rec.basic_information.resource_url, rec.date_added, JSON.stringify(rec.basic_information.genres), JSON.stringify(rec.basic_information.styles), rec.basic_information.cover_image]
+      tx.executeSql(       
+        `INSERT INTO records (discogs_id, title, artists, year, thumbnail, resource_url, date_added, genres, styles, cover_image)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(discogs_id) DO UPDATE SET
+           title=excluded.title,
+           artists=excluded.artists,
+           year=excluded.year,
+           thumbnail=excluded.thumbnail,
+           resource_url=excluded.resource_url,
+           date_added=excluded.date_added,
+           genres=excluded.genres,
+           styles=excluded.styles,
+           cover_image=excluded.cover_image
+        `,
+        [rec.id, rec.basic_information.title, JSON.stringify(rec.basic_information.artists), rec.basic_information.year, rec.basic_information.thumb, rec.basic_information.resource_url, rec.date_added, JSON.stringify(rec.basic_information.genres), JSON.stringify(rec.basic_information.styles), rec.basic_information.cover_image]
+        
       );
     }
   })

@@ -5,7 +5,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
-import { getDatabase, diagnoseSQLiteIssues } from './database/database';
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -18,23 +17,6 @@ const LandingPage = () => {
     }
   }, [isAuthorized, navigation]);
   
-
-//   React.useEffect(function() {
-//     SQLite.DEBUG(true);
-//     SQLite.enablePromise(true);
-//     try {
-//       SQLite.openDatabase({
-//         name: "TestDatabase",
-//         location: "default"
-//     }).then((db) => {
-//         console.log("Database open!", db);
-//     });
-//     } catch (error) {
-      
-//     }
-    
-// }, []);
-
   const handleClearTokens = async () => {
     try {
       await clearDiscogsToken();
