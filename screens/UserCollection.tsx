@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native'
-import { CollectionRelease } from '../services/discogsApi'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { RootStackParamList } from '../App'
 import { Image } from 'react-native'
@@ -33,48 +32,13 @@ const UserCollection = () => {
   const [loading, setLoading] = useState(true)
   const route = useRoute<CollectionScreenRouteProp>()
   const username = route.params?.username
-
-  // useEffect(() => {
-  //   const load = async () => {
-  //     try {
-  //       const data = await fetchUserCollection(username)
-  //       console.log('collection data:', data)
-  //       getDB() // Ensure DB is initialized
-  //       setReleases(data)
-  //     } catch (err) {
-  //       console.error(err)
-  //       Alert.alert('Error', 'Could not load collection')
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-
-  //   load()
-  // }, [username])
-
-
   
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        console.log('bootstrapping UserCollection...')
-        initDatabase(); // ✅ sets up tables
-        await syncIfStale(username); // ✅ syncs with Discogs if stale
-        const data = await getAllRecords(); // ✅ read from local
-        console.log(`✅ Loaded ${data.length} records from local DB`);
-        console.log('data sample:', data);
-        // transform data to match Record interface if needed
-        // const transformedData = data.map(item => ({
-        //   id: item.id,
-        //   discogs_id: item.discogs_id,
-        //   date_added: item.date_added,
-        //   title: item.title,
-        //   year: item.year,
-        //   artists: item.artists,
-        //   cover_image: item.cover_image,
-        //   thumb: item.thumb,
-        //   resource_url: item.resource_url,
-        // }));
+        initDatabase(); 
+        await syncIfStale(username); 
+        const data = await getAllRecords(); 
         setReleases(data);
       } catch (e) {
         console.error('Error initializing app:', e);
