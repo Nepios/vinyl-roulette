@@ -5,65 +5,50 @@ import {
   FlatList,
   ActivityIndicator,
   StyleSheet,
-  Alert,
-  Button,
 } from 'react-native'
-import { fetchUserCollection, CollectionRelease } from '../services/discogsApi'
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { clearDiscogsToken } from '../services/auth/tokenStorage'
-import { useAuthContext } from '../contexts/AuthContext'
+import { RouteProp, useRoute } from '@react-navigation/native'
 import { RootStackParamList } from '../App'
+import { Image } from 'react-native'
+import { initDatabase } from '../database/database'
+import { getAllRecords } from '../database/collectionService'
+import { syncIfStale } from '../database/syncService'
 
 type CollectionScreenRouteProp = RouteProp<RootStackParamList, 'Collection'>
 
+export interface Record {
+  id: number
+  discogs_id: number
+  date_added?: string
+  title: string
+  year: number
+  artists: string
+  cover_image?: string
+  thumb?: string
+  resource_url: string
+}
+
 const UserCollection = () => {
-  const [releases, setReleases] = useState<CollectionRelease[]>([])
+  const [releases, setReleases] = useState<Record[]>([])
   const [loading, setLoading] = useState(true)
   const route = useRoute<CollectionScreenRouteProp>()
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
-  const { refreshAuth } = useAuthContext()
   const username = route.params?.username
-
-  const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await clearDiscogsToken()
-              refreshAuth()
-              navigation.navigate('Login')
-            } catch (error) {
-              console.error('Error during logout:', error)
-              Alert.alert('Error', 'Could not logout properly')
-            }
-          }
-        }
-      ]
-    )
-  }
-
+  
   useEffect(() => {
-    const load = async () => {
+    const bootstrap = async () => {
       try {
-        const data = await fetchUserCollection(username)
-        setReleases(data)
-      } catch (err) {
-        console.error(err)
-        Alert.alert('Error', 'Could not load collection')
+        initDatabase(); 
+        await syncIfStale(username); 
+        const data = await getAllRecords(); 
+        setReleases(data);
+      } catch (e) {
+        console.error('Error initializing app:', e);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    load()
-  }, [username])
+    bootstrap();
+  }, [username]);
 
   if (!username) {
     return (
@@ -76,14 +61,15 @@ const UserCollection = () => {
   }
 
 
-  const renderItem = ({ item }: { item: CollectionRelease }) => {
-    const info = item.basic_information
+  const renderItem = ({ item }: { item: Record }) => {
+    if (!item) return null;
     return (
       <View style={styles.item}>
         <Text style={styles.title}>
-          {info.title} ({info.year})
+          {item.title} ({item.year})
         </Text>
-        <Text style={styles.artist}>{info.artists.map(a => a.name).join(', ')}</Text>
+        <Text style={styles.artist}>{JSON.parse(item.artists).map((a: { name: string }) => a.name).join(', ')}</Text>
+        {item.cover_image && <Image source={{ uri: item.cover_image }} style={styles.coverImage} />}
       </View>
     )
   }
@@ -130,6 +116,12 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 20
+  },
+  coverImage: {
+    marginTop: 8,
+    width: 100,
+    height: 100,
+    borderRadius: 4,
   },
 })
 

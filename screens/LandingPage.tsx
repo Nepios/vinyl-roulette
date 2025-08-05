@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { RootStackParamList } from '../App';
 import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 
@@ -16,7 +16,7 @@ const LandingPage = () => {
       navigation.navigate('Login');
     }
   }, [isAuthorized, navigation]);
-
+  
   const handleClearTokens = async () => {
     try {
       await clearDiscogsToken();

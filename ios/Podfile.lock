@@ -1753,6 +1753,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-sqlite-2 (3.6.2):
+    - React-Core
   - react-native-udp (2.7.0):
     - React
   - React-NativeModulesApple (0.80.1):
@@ -2614,6 +2616,7 @@ DEPENDENCIES:
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-sqlite-2 (from `../node_modules/react-native-sqlite-2`)
   - react-native-udp (from `../node_modules/react-native-udp`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-oscompat (from `../node_modules/react-native/ReactCommon/oscompat`)
@@ -2755,6 +2758,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-randombytes"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-sqlite-2:
+    :path: "../node_modules/react-native-sqlite-2"
   react-native-udp:
     :path: "../node_modules/react-native-udp"
   React-NativeModulesApple:
@@ -2887,6 +2892,7 @@ SPEC CHECKSUMS:
   react-native-get-random-values: d16467cf726c618e9c7a8c3c39c31faa2244bbba
   react-native-randombytes: 4eeddad82d1fd57adda1cd5beffe67d041c9d6de
   react-native-safe-area-context: 68d1363b8354472a961aa6861ba8451beaf9a810
+  react-native-sqlite-2: 1356d7be6e51712e5de9fdc0be2be140162b563d
   react-native-udp: 9019822bb289526c077f6266f0d1d6ed104777ed
   React-NativeModulesApple: 983f3483ef0a3446b56d490f09d579fba2442e17
   React-oscompat: 114036cd8f064558c9c1a0c04fc9ae5e1453706a
@@ -2931,6 +2937,6 @@ SPEC CHECKSUMS:
   TcpSockets: d7fa8433e76a140bb34349c813eaa860e7f087af
   Yoga: daa1e4de4b971b977b23bc842aaa3e135324f1f3
 
-PODFILE CHECKSUM: dfe6b3ad9255ba0b75110d27b35adbb85c7719dc
+PODFILE CHECKSUM: 51b6c32721d784a16ea47c5f9e18244076595012
 
 COCOAPODS: 1.16.2
