@@ -22,7 +22,7 @@ export interface Record {
   date_added?: string
   title: string
   year: number
-  artists: { name: string }[]
+  artists: string
   cover_image?: string
   thumb?: string
   resource_url: string
@@ -59,7 +59,7 @@ const UserCollection = () => {
       try {
         console.log('bootstrapping UserCollection...')
         initDatabase(); // ✅ sets up tables
-        await syncIfStale(); // ✅ syncs with Discogs if stale
+        await syncIfStale(username); // ✅ syncs with Discogs if stale
         const data = await getAllRecords(); // ✅ read from local
         console.log(`✅ Loaded ${data.length} records from local DB`);
         console.log('data sample:', data);
@@ -99,12 +99,13 @@ const UserCollection = () => {
 
   const renderItem = ({ item }: { item: Record }) => {
     if (!item) return null;
+
     return (
       <View style={styles.item}>
         <Text style={styles.title}>
           {item.title} ({item.year})
         </Text>
-        {/* <Text style={styles.artist}>{item.artists?.map(a => a.name)}</Text> */}
+        <Text style={styles.artist}>{JSON.parse(item.artists).map((a: { name: string }) => a.name).join(', ')}</Text>
         {item.cover_image && <Image source={{ uri: item.cover_image }} style={styles.coverImage} />}
       </View>
     )

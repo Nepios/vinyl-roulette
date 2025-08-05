@@ -20,7 +20,7 @@ const oauth = new OAuth({
 
 export interface CollectionRelease {
   id: number
-  date_added?: string
+  date_added: string
   basic_information: {
     title: string
     year: number
@@ -41,7 +41,7 @@ export const fetchUserCollection = async (username: string): Promise<CollectionR
   const requestData = {
     url,
     method: 'GET',
-    // parameters: { sort: 'ta', sort_order: 'descending' },
+    parameters: { sort: 'title', sort_order: 'asc'},
   }
 
   const headers = oauth.toHeader(
@@ -54,7 +54,7 @@ export const fetchUserCollection = async (username: string): Promise<CollectionR
   const response = await axios.get<{ releases: CollectionRelease[] }>(url, {
     headers: { ...headers },
   })
-  console.log('Fetched releases response:', response.data)
+  console.log('Fetched releases response:', response.data.releases.slice(0, 3)) // Log first 3 releases for debugging
   return response.data.releases || []
 }
 

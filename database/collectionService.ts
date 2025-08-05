@@ -7,8 +7,8 @@ export const saveRecords = (records: CollectionRelease[]) => {
   db.transaction((tx) => {
     for (const rec of records) {
       tx.executeSql(
-        `INSERT OR REPLACE INTO records (id, discogs_id, title, artists, year, thumbnail, resource_url) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [null, rec.id, rec.basic_information.title, JSON.stringify(rec.basic_information.artists), rec.basic_information.year, rec.basic_information.thumb, rec.basic_information.resource_url]
+        `INSERT OR REPLACE INTO records (id, discogs_id, title, artists, year, thumbnail, resource_url, date_added) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [null, rec.id, rec.basic_information.title, JSON.stringify(rec.basic_information.artists), rec.basic_information.year, rec.basic_information.thumb, rec.basic_information.resource_url, rec.date_added]
       );
     }
   }, (error) => {
@@ -28,7 +28,8 @@ export const getAllRecords = (): Promise<Record[]> => {
         for (let i = 0; i < len; i++) {
           data.push(results.rows.item(i));
         }
-
+        console.log(`✅ Retrieved ${len} records from local DB`);
+        console.log('Sample records:', data.slice(0, 3));
         resolve(data);
       });
     }, (error) => {

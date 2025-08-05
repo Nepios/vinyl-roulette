@@ -3,7 +3,7 @@ import { CollectionRelease, fetchUserCollection} from '../services/discogsApi'; 
 
 const SYNC_INTERVAL_MS = 1000 * 60 * 60; // 1 hour
 
-export const syncIfStale = async (force = false): Promise<'fetched' | 'skipped'> => {
+export const syncIfStale = async (username: string, force = false): Promise<'fetched' | 'skipped'> => {
   console.log('🔍 Checking if sync is needed...');
   const lastSync = await getLastSyncTime();
   const now = Date.now();
@@ -13,7 +13,6 @@ export const syncIfStale = async (force = false): Promise<'fetched' | 'skipped'>
 
   if (isStale || force) {
     console.log('🔄 Fetching remote collection...');
-    const username = process.env.DISCOGS_USERNAME || 'yourUsername';
     const records: CollectionRelease[] = await fetchUserCollection(username);
     console.log(`✅ Fetched ${records.length} records from remote`);
     console.log('Sample records:', records.slice(0, 3));

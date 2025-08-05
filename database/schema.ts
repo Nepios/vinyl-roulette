@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS records (
   date_added TEXT,
   title TEXT,
   artists TEXT,
-  year TEXT,
+  year INTEGER,
   thumbnail TEXT,
   resource_url TEXT
 )`;
