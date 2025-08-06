@@ -12,6 +12,7 @@ import { Image } from 'react-native'
 import { initDatabase } from '../database/database'
 import { getAllRecords } from '../database/collectionService'
 import { syncIfStale } from '../database/syncService'
+import { useRecordsContext } from '../contexts/RecordsContext'
 
 type CollectionScreenRouteProp = RouteProp<RootStackParamList, 'Collection'>
 
@@ -28,7 +29,7 @@ export interface Record {
 }
 
 const UserCollection = () => {
-  const [releases, setReleases] = useState<Record[]>([])
+  const { records, setRecords } = useRecordsContext()
   const [loading, setLoading] = useState(true)
   const route = useRoute<CollectionScreenRouteProp>()
   const username = route.params?.username
@@ -39,7 +40,7 @@ const UserCollection = () => {
         initDatabase(); 
         await syncIfStale(username); 
         const data = await getAllRecords(); 
-        setReleases(data);
+        setRecords(data);
       } catch (e) {
         console.error('Error initializing app:', e);
       } finally {
@@ -48,7 +49,7 @@ const UserCollection = () => {
     };
 
     bootstrap();
-  }, [username]);
+  }, [username, setRecords]);
 
   if (!username) {
     return (
@@ -80,7 +81,7 @@ const UserCollection = () => {
 
   return (
     <FlatList
-      data={releases}
+      data={records}
       keyExtractor={item => item.id.toString()}
       renderItem={renderItem}
       contentContainerStyle={styles.list}

@@ -6,6 +6,7 @@ import DiscogsLoginScreen from './screens/DiscogsLoginScreen'
 import UserCollection from './screens/UserCollection'
 import LandingPage from './screens/LandingPage'
 import { AuthProvider, useAuthContext } from './contexts/AuthContext'
+import { RecordsProvider } from './contexts/RecordsContext'
 
 export type RootStackParamList = {
   Home: undefined;
@@ -16,7 +17,7 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
-  const { isAuthorized, username, loading } = useAuthContext()
+  const { username, loading } = useAuthContext()
 
   // Show loading screen while checking authorization
   if (loading) {
@@ -56,7 +57,9 @@ const AppNavigator = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <AppNavigator />
+      <RecordsProvider>
+        <AppNavigator />
+      </RecordsProvider>
     </AuthProvider>
   )
 }
