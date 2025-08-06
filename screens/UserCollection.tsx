@@ -39,7 +39,9 @@ const UserCollection = () => {
       try {
         initDatabase(); 
         await syncIfStale(username); 
+        console.log('Database initialized and synced for user:', username);
         const data = await getAllRecords(); 
+        console.log('Fetched records:', data.length, data);
         setRecords(data);
       } catch (e) {
         console.error('Error initializing app:', e);
