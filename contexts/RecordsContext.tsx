@@ -9,7 +9,7 @@ interface RecordsContextType {
 const RecordsContext = createContext<RecordsContextType | undefined>(undefined)
 
 export const RecordsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [records , setRecords] = useState<Record[]>([])
+  const [records, setRecords] = useState<Record[]>([])
 
   return (
     <RecordsContext.Provider value={{ records, setRecords }}>

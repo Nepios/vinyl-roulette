@@ -2,7 +2,7 @@ import { getLastSyncTime, updateLastSyncTime, saveRecords } from './collectionSe
 import { CollectionRelease, fetchUserCollection} from '../services/discogsApi';
 
 // const SYNC_INTERVAL_MS = 1000 * 60 * 60; // 1 hour
-const SYNC_INTERVAL_MS = 1000 * 60 * 1; // 5 minutes
+const SYNC_INTERVAL_MS = 1000 * 60 * 1; // 1 minutes
 
 export const syncIfStale = async (username: string, force = false): Promise<'fetched' | 'skipped'> => {
   const lastSync = await getLastSyncTime();
