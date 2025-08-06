@@ -30,7 +30,7 @@ const LandingPage = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Landing Page</Text>
-      <Button title="Go to My Collection" onPress={() => navigation.navigate('Collection', { username })} />
+      <Button title="Go to My Collection" onPress={() => navigation.navigate('Collection', { username: username ?? '' })} />
       <Button title="Clear Tokens" onPress={handleClearTokens} />
     </View>
   );

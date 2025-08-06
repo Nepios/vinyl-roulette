@@ -1,5 +1,5 @@
 import SQLite from 'react-native-sqlite-2';
-import { createTables, createRecordsTable, createMetadataTable } from './schema';
+import { createRecordsTable, createMetadataTable } from './schema';
 
 const db = SQLite.openDatabase('vinyl.db', '1.0', '', 1);
 
