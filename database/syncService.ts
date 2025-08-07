@@ -8,8 +8,8 @@ export const syncIfStale = async (username: string, force = false): Promise<'fet
   const lastSync = await getLastSyncTime();
   const now = Date.now();
   const timeSinceLastSync = lastSync ? now - lastSync : null;
-  const isStale = !lastSync || timeSinceLastSync! > SYNC_INTERVAL_MS;
-  
+  const isStale = !lastSync || (timeSinceLastSync !== null && timeSinceLastSync > SYNC_INTERVAL_MS);
+
   const lastSyncFormatted = lastSync ? new Date(lastSync).toLocaleTimeString() : 'never';
   const timeSinceFormatted = timeSinceLastSync ? `${Math.round(timeSinceLastSync / 1000)}s ago` : 'never';
   

@@ -129,7 +129,7 @@ const LandingPage = () => {
           <Text style={styles.artist} numberOfLines={2} ellipsizeMode="tail">
             {displayArtists}
           </Text>
-          <Text style={styles.year} numberOfLines={2} ellipsizeMode="tail">
+          <Text style={styles.year}>
             {randomRecord.year}
           </Text>
 
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     textAlign: 'center',
-    height: 50, // Fixed height for 2 lines
+    minHeight: 50, // Fixed height for 2 lines, flexible for accessibility
     width: '100%',
   },
   artist: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     textAlign: 'center',
-    height: 40, // Fixed height for 2 lines
+    minHeight: 40, // Fixed height for 2 lines, flexible for accessibility
     width: '100%',
   },
   imageContainer: {
