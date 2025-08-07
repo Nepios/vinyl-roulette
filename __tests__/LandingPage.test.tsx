@@ -3,10 +3,12 @@ import ReactTestRenderer from 'react-test-renderer';
 import { Alert } from 'react-native';
 import LandingPage from '../screens/LandingPage';
 import { useAuthContext } from '../contexts/AuthContext';
+import { useRecordsContext } from '../contexts/RecordsContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 
 // Mock dependencies
 jest.mock('../contexts/AuthContext');
+jest.mock('../contexts/RecordsContext');
 jest.mock('../services/auth/tokenStorage');
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
@@ -15,6 +17,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 const mockUseAuthContext = useAuthContext as jest.MockedFunction<typeof useAuthContext>;
+const mockUseRecordsContext = useRecordsContext as jest.MockedFunction<typeof useRecordsContext>;
 const mockClearDiscogsToken = clearDiscogsToken as jest.MockedFunction<typeof clearDiscogsToken>;
 const mockNavigate = jest.fn();
 
@@ -29,10 +32,24 @@ jest.mock('@react-navigation/native', () => ({
 
 describe('LandingPage', () => {
   const mockRefreshAuth = jest.fn();
+  const mockRefreshCollection = jest.fn();
+  const mockClearError = jest.fn();
+  const mockLoadCollection = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockNavigate.mockClear();
+    
+    // Default RecordsContext mock
+    mockUseRecordsContext.mockReturnValue({
+      records: [],
+      loading: false,
+      error: null,
+      initialized: false,
+      loadCollection: mockLoadCollection,
+      refreshCollection: mockRefreshCollection,
+      clearError: mockClearError,
+    });
   });
 
   describe('When user is authorized', () => {
@@ -46,13 +63,21 @@ describe('LandingPage', () => {
       });
     });
 
-    it('should render landing page title', () => {
+    it('should render collection stats', () => {
       let component;
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const textElement = component.root.findByProps({ children: 'Landing Page' });
-      expect(textElement).toBeTruthy();
+      const textElements = component!.root.findAllByType('Text');
+      const statsElement = textElements.find(el => 
+        el.children.some(child => 
+          typeof child === 'string' && child.includes('Collection:')
+        )
+      );
+      expect(statsElement).toBeTruthy();
+      // React Native Text components with template literals are rendered as multiple children
+      const fullText = statsElement!.children.join('');
+      expect(fullText).toMatch(/Collection: \d+ records/);
     });
 
     it('should render navigation buttons', () => {
@@ -60,8 +85,8 @@ describe('LandingPage', () => {
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const collectionButton = component.root.findByProps({ title: 'Go to My Collection' });
-      const clearTokensButton = component.root.findByProps({ title: 'Clear Tokens' });
+      const collectionButton = component!.root.findByProps({ title: 'Go to My Collection' });
+      const clearTokensButton = component!.root.findByProps({ title: 'Clear Tokens' });
       expect(collectionButton).toBeTruthy();
       expect(clearTokensButton).toBeTruthy();
     });
@@ -71,7 +96,7 @@ describe('LandingPage', () => {
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const collectionButton = component.root.findByProps({ title: 'Go to My Collection' });
+      const collectionButton = component!.root.findByProps({ title: 'Go to My Collection' });
       
       ReactTestRenderer.act(() => {
         collectionButton.props.onPress();
@@ -106,9 +131,18 @@ describe('LandingPage', () => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
       
-      expect(component.root.findByProps({ children: 'Landing Page' })).toBeTruthy();
-      expect(component.root.findByProps({ title: 'Go to My Collection' })).toBeTruthy();
-      expect(component.root.findByProps({ title: 'Clear Tokens' })).toBeTruthy();
+      const textElements = component!.root.findAllByType('Text');
+      const statsElement = textElements.find(el => 
+        el.children.some(child => 
+          typeof child === 'string' && child.includes('Collection:')
+        )
+      );
+      expect(statsElement).toBeTruthy();
+      // React Native Text components with template literals are rendered as multiple children
+      const fullText = statsElement!.children.join('');
+      expect(fullText).toMatch(/Collection: \d+ records/);
+      expect(component!.root.findByProps({ title: 'Go to My Collection' })).toBeTruthy();
+      expect(component!.root.findByProps({ title: 'Clear Tokens' })).toBeTruthy();
     });
   });
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { View, ActivityIndicator, StyleSheet } from 'react-native'
@@ -6,7 +6,7 @@ import DiscogsLoginScreen from './screens/DiscogsLoginScreen'
 import UserCollection from './screens/UserCollection'
 import LandingPage from './screens/LandingPage'
 import { AuthProvider, useAuthContext } from './contexts/AuthContext'
-import { RecordsProvider } from './contexts/RecordsContext'
+import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext'
 
 export type RootStackParamList = {
   Home: undefined;
@@ -17,10 +17,19 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
-  const { username, loading } = useAuthContext()
+  const { username, loading: authLoading, isAuthorized } = useAuthContext()
+  const { loadCollection, loading: recordsLoading, initialized } = useRecordsContext()
 
-  // Show loading screen while checking authorization
-  if (loading) {
+  // Load collection once when user is authorized and username is available
+  useEffect(() => {
+    if (isAuthorized && username && !initialized && !recordsLoading) {
+      console.log('🚀 Initial collection load for authenticated user:', username)
+      loadCollection(username)
+    }
+  }, [isAuthorized, username, initialized, recordsLoading, loadCollection])
+
+  // Show loading screen while checking authorization or loading initial data
+  if (authLoading) {
     return (
       <View style={styles.loadingContainer} testID="loading-container">
         <ActivityIndicator size="large" color="#0000ff" />
@@ -36,7 +45,7 @@ const AppNavigator = () => {
         <Stack.Screen
           name="Home"
           component={LandingPage}
-          options={{ title: 'Home' }}
+          options={{ title: 'Vinyl Roulette' }}
         />
         <Stack.Screen
           name="Login"

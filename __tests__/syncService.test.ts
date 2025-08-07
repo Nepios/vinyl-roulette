@@ -136,9 +136,11 @@ describe('syncService', () => {
 
       await syncIfStale(mockUsername);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        `Last sync: ${staleTimestamp}, Now: 1000000000, Is stale: true, Force: false`
-      );
+      // Check that sync logging includes the username
+      expect(consoleLogSpy).toHaveBeenCalledWith(`🔄 Sync check for ${mockUsername}:`);
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Is stale: true, Force: false'));
+      expect(consoleLogSpy).toHaveBeenCalledWith('📥 Fetching collection from Discogs...');
+      expect(consoleLogSpy).toHaveBeenCalledWith('✅ Sync completed: 1 records saved');
     });
 
     it('should log skip message when sync is skipped', async () => {
