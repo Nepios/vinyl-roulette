@@ -1,6 +1,7 @@
 import OAuth from 'oauth-1.0a'
 import axios from 'axios'
 import crypto from 'react-native-crypto'
+import { safeLog, safeError } from '../../utils/logger'
 
 const consumerKey = process.env.DISCOGS_CONSUMER_KEY
 const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET
@@ -25,7 +26,7 @@ const oauth = new OAuth({
 })
 
 export const getRequestToken = async (): Promise<{ oauth_token: string; oauth_token_secret: string }> => {
-  console.log('getRequestToken called')
+  safeLog('getRequestToken called')
   
   const url = 'https://api.discogs.com/oauth/request_token'
   const requestData = {
@@ -34,12 +35,12 @@ export const getRequestToken = async (): Promise<{ oauth_token: string; oauth_to
     data: { oauth_callback: callbackUrl },
   }
   
-  console.log('Request token data:', requestData)
+  safeLog('Request token data:', requestData)
   
   const authData = oauth.authorize(requestData)
   const headers = oauth.toHeader(authData)
   
-  console.log('Request token headers:', headers)
+  safeLog('Request token headers:', headers)
   
   try {
     const res = await axios({
@@ -53,20 +54,20 @@ export const getRequestToken = async (): Promise<{ oauth_token: string; oauth_to
       data: `oauth_callback=${encodeURIComponent(callbackUrl)}`,
     })
     
-    console.log('Request token response:', res.data)
+    safeLog('Request token response:', res.data)
     
     const parts = Object.fromEntries(res.data.split('&').map((s: string) => s.split('=')))
     
-    console.log('Parsed request token parts:', parts)
+    safeLog('Parsed request token parts:', parts)
     
     return {
       oauth_token: parts.oauth_token,
       oauth_token_secret: parts.oauth_token_secret,
     }
-  } catch (error) {
-    console.error('Request token request failed:', error.response?.data || error.message)
-    console.error('Request headers:', headers)
-    console.error('Request URL:', url)
+  } catch (error: any) {
+    safeError('Request token request failed:', error.response?.data || error.message)
+    safeError('Request headers:', headers)
+    safeError('Request URL:', url)
     throw error
   }
 }
@@ -76,7 +77,7 @@ export const getAccessToken = async (
   oauth_token_secret: string,
   oauth_verifier: string
 ): Promise<{ oauth_token: string; oauth_token_secret: string }> => {
-  console.log('getAccessToken called with:', { oauth_token, oauth_verifier })
+  safeLog('getAccessToken called with:', { oauth_token, oauth_verifier })
   
   const url = 'https://api.discogs.com/oauth/access_token'
   
@@ -89,7 +90,7 @@ export const getAccessToken = async (
     },
   }
   
-  console.log('Request data:', requestData)
+  safeLog('Request data:', requestData)
   
   // Generate OAuth signature with the request token
   const authData = oauth.authorize(requestData, {
@@ -97,10 +98,10 @@ export const getAccessToken = async (
     secret: oauth_token_secret,
   })
   
-  console.log('Generated auth data:', authData)
+  safeLog('Generated auth data:', authData)
   
   const headers = oauth.toHeader(authData)
-  console.log('Generated headers:', headers)
+  safeLog('Generated headers:', headers)
   
   try {
     // Send POST request with form data
@@ -115,17 +116,17 @@ export const getAccessToken = async (
       data: `oauth_verifier=${encodeURIComponent(oauth_verifier)}`,
     })
     
-    console.log('Access token response:', res.data)
+    safeLog('Access token response:', res.data)
     
     const parts = Object.fromEntries(res.data.split('&').map((s: string) => s.split('=')))
     return {
       oauth_token: parts.oauth_token,
       oauth_token_secret: parts.oauth_token_secret,
     }
-  } catch (error) {
-    console.error('Access token request failed:', error.response?.data || error.message)
-    console.error('Request headers:', headers)
-    console.error('Request URL:', url)
+  } catch (error: any) {
+    safeError('Access token request failed:', error.response?.data || error.message)
+    safeError('Request headers:', headers)
+    safeError('Request URL:', url)
     throw error
   }
 }
