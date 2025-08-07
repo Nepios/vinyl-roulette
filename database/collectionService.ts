@@ -58,8 +58,16 @@ export const getLastSyncTime = (): Promise<number | null> => {
           [],
           (_, result) => {
             if (result.rows.length > 0) {
-              const timestamp = parseInt(result.rows.item(0).value, 10);
-              resolve(timestamp);
+              const rawValue = result.rows.item(0).value;
+              const timestamp = parseInt(rawValue, 10);
+              
+              // Validate that parsing was successful and value is a valid timestamp
+              if (isNaN(timestamp) || timestamp < 0) {
+                console.warn('Invalid timestamp value in database:', rawValue);
+                resolve(null);
+              } else {
+                resolve(timestamp);
+              }
             } else {
               resolve(null);
             }
@@ -78,6 +86,12 @@ export const getLastSyncTime = (): Promise<number | null> => {
 };
 
 export const updateLastSyncTime = (timestamp: number): void => {
+  // Validate timestamp is a valid number and not negative
+  if (isNaN(timestamp) || timestamp < 0) {
+    console.warn('Invalid timestamp provided to updateLastSyncTime:', timestamp);
+    return;
+  }
+  
   const db = getDB();
   db.transaction((tx) => {
     tx.executeSql(
