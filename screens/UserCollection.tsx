@@ -13,6 +13,7 @@ import { RootStackParamList } from '../App'
 import { Image } from 'react-native'
 import { useRecordsContext } from '../contexts/RecordsContext'
 import { Record } from '../types/Record'
+import BottomNavigation from '../components/BottomNavigation'
 
 type CollectionScreenRouteProp = RouteProp<RootStackParamList, 'Collection'>
 
@@ -57,73 +58,86 @@ const UserCollection = () => {
     )
   }, [parseArtists])
 
-  if (!username) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>
-          Error: Missing username parameter.
-        </Text>
-      </View>
-    )
-  }
+  const renderContent = () => {
+    if (!username) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>
+            Error: Missing username parameter.
+          </Text>
+        </View>
+      )
+    }
 
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Button title="Dismiss" onPress={clearError} />
-        <Button title="Retry" onPress={handleRefresh} />
-      </View>
-    )
-  }
+    if (error) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Button title="Dismiss" onPress={clearError} />
+          <Button title="Retry" onPress={handleRefresh} />
+        </View>
+      )
+    }
 
-  if (loading && records.length === 0) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={styles.loadingText}>Loading your collection...</Text>
-      </View>
-    )
-  }
+    if (loading && records.length === 0) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.loadingText}>Loading your collection...</Text>
+        </View>
+      )
+    }
 
-  if (records.length === 0) {
+    if (records.length === 0) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No records found in your collection.</Text>
+          <Button title="Refresh" onPress={handleRefresh} />
+        </View>
+      )
+    }
+
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No records found in your collection.</Text>
-        <Button title="Refresh" onPress={handleRefresh} />
-      </View>
+      <FlatList
+        data={records}
+        keyExtractor={item => item.id.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+          />
+        }
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.headerText}>
+              {records.length} record{records.length !== 1 ? 's' : ''} in your collection
+            </Text>
+          </View>
+        }
+      />
     )
   }
 
   return (
-    <FlatList
-      data={records}
-      keyExtractor={item => item.id.toString()}
-      renderItem={renderItem}
-      contentContainerStyle={styles.list}
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={handleRefresh}
-        />
-      }
-      ListHeaderComponent={
-        <View style={styles.header}>
-          <Text style={styles.headerText}>
-            {records.length} record{records.length !== 1 ? 's' : ''} in your collection
-          </Text>
-        </View>
-      }
-    />
+    <View style={styles.container}>
+      {renderContent()}
+      <BottomNavigation />
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#2d5a4a',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#2d5a4a',
   },
   loadingText: {
     marginTop: 16,
@@ -135,7 +149,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#2d5a4a',
   },
   errorText: {
     color: '#c62828',
@@ -148,7 +162,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#2d5a4a',
   },
   emptyText: {
     fontSize: 16,
@@ -158,6 +172,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: 16,
+    backgroundColor: '#2d5a4a',
   },
   header: {
     paddingBottom: 16,
@@ -169,9 +184,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   item: {
+    width: '100%',
     marginBottom: 16,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -183,11 +199,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     color: '#333',
+    textAlign: 'center',
   },
   artist: {
     marginTop: 4,
     fontSize: 14,
-    color: '#555',
+    color: '#f4f1eb',
+    textAlign: 'center',
   },
   coverImage: {
     marginTop: 12,

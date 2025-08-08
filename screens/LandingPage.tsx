@@ -8,6 +8,7 @@ import { clearDiscogsToken } from '../services/auth/tokenStorage';
 import { getRandomRecord } from '../utils/recordUtils';
 import { useRecordsContext } from '../contexts/RecordsContext'
 import { Record } from '../types/Record';
+import BottomNavigation from '../components/BottomNavigation';
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -76,65 +77,69 @@ const LandingPage = () => {
 
   return (
     <View style={styles.container}>
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <Button title="Dismiss" onPress={clearError} />
-          <Button title="Retry" onPress={handleRefreshCollection} />
-        </View>
-      )}
-
-      <View style={styles.statsContainer}>
-        <Text style={styles.statsText}>Collection: {records.length} records</Text>
-        {loading && <Text style={styles.loadingText}>Syncing...</Text>}
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <Button 
-          title="Random Record" 
-          onPress={handleRandomRecord}
-          disabled={records.length === 0 || loading}
-        />
-        <Button 
-          title="Go to My Collection" 
-          onPress={() => navigation.navigate('Collection', { username: username ?? '' })}
-          disabled={!username}
-        />
-        <Button 
-          title="Refresh Collection" 
-          onPress={handleRefreshCollection}
-          disabled={!username || loading}
-        />
-        <Button title="Clear Tokens" onPress={handleClearTokens} />
-      </View>
-
-      {randomRecord && (
-        <View style={styles.recordContainer}>
-          <Text style={styles.recordTitle} numberOfLines={2} ellipsizeMode="tail">
-            {randomRecord.title} 
-          </Text>
-          <View style={styles.imageContainer}>
-            {randomRecord.cover_image ? (
-              <Image 
-                source={{ uri: randomRecord.cover_image }} 
-                style={styles.coverImage}
-                onError={() => console.log('Failed to load cover image')}
-              />
-            ) : (
-              <View style={styles.placeholderImage}>
-                <Text style={styles.placeholderText}>No Image</Text>
-              </View>
-            )}
+      <View style={styles.content}>
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Button title="Dismiss" onPress={clearError} />
+            <Button title="Retry" onPress={handleRefreshCollection} />
           </View>
-          <Text style={styles.artist} numberOfLines={2} ellipsizeMode="tail">
-            {displayArtists}
-          </Text>
-          <Text style={styles.year}>
-            {randomRecord.year}
-          </Text>
+        )}
 
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsText}>Collection: {records.length} records</Text>
+          {loading && <Text style={styles.loadingText}>Syncing...</Text>}
         </View>
-      )}
+
+        <View style={styles.buttonContainer}>
+          <Button 
+            title="Random Record" 
+            onPress={handleRandomRecord}
+            disabled={records.length === 0 || loading}
+          />
+          <Button 
+            title="Go to My Collection" 
+            onPress={() => navigation.navigate('Collection', { username: username ?? '' })}
+            disabled={!username}
+          />
+          <Button 
+            title="Refresh Collection" 
+            onPress={handleRefreshCollection}
+            disabled={!username || loading}
+          />
+          <Button title="Clear Tokens" onPress={handleClearTokens} />
+        </View>
+
+        {randomRecord && (
+          <View style={styles.recordContainer}>
+            <Text style={styles.recordTitle} >
+              {randomRecord.title} 
+            </Text>
+            <Text style={styles.artist} >
+              {displayArtists}
+            </Text>
+            <View style={styles.imageContainer}>
+              {randomRecord.cover_image ? (
+                <Image 
+                  source={{ uri: randomRecord.cover_image }} 
+                  style={styles.coverImage}
+                  onError={() => console.log('Failed to load cover image')}
+                />
+              ) : (
+                <View style={styles.placeholderImage}>
+                  <Text style={styles.placeholderText}>No Image</Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={styles.year}>
+              {randomRecord.year}
+            </Text>
+
+          </View>
+        )}
+      </View>
+      <BottomNavigation />
     </View>
   );
 };
@@ -142,16 +147,19 @@ const LandingPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#2d5a4a',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
     padding: 16,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#2d5a4a',
   },
   loadingText: {
     marginTop: 16,
@@ -159,7 +167,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   errorContainer: {
-    backgroundColor: '#ffebee',
+    backgroundColor: '#2d5a4a',
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
@@ -186,7 +194,7 @@ const styles = StyleSheet.create({
   recordContainer: {
     marginTop: 20,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
@@ -194,35 +202,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    width: 300,
-    minHeight: 220,
+    width: '100%',
+    minHeight: 300,
   },
   recordTitle: {
     fontWeight: 'bold',
     fontSize: 18,
     textAlign: 'center',
-    minHeight: 50, // Fixed height for 2 lines, flexible for accessibility
     width: '100%',
   },
   artist: {
-    marginTop: 30,
+    marginTop: 8,
     fontSize: 14,
-    color: '#555',
+    color: '#f4f1eb',
     textAlign: 'center',
-    minHeight: 40, // Fixed height for 2 lines, flexible for accessibility
     width: '100%',
   },
   imageContainer: {
-    marginTop: 12,
+    marginTop: 10,
     width: 150,
     height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 8,
+    alignSelf: 'center',
   },
   coverImage: {
     width: 150,
     height: 150,
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   placeholderImage: {
     width: 150,
@@ -242,9 +250,10 @@ const styles = StyleSheet.create({
   },
   year: {
     fontSize: 14,
-    color: '#555',
+    color: '#f4f1eb',
     textAlign: 'center',
     width: '100%',
+    marginTop: 10,
   },
 });
 
