@@ -3,15 +3,19 @@ import { Record } from '../types/Record'
 import { initDatabase } from '../database/database'
 import { syncIfStale } from '../database/syncService'
 import { getAllRecords } from '../database/collectionService'
+import { getRandomRecord as getRandomRecordUtil } from '../utils/recordUtils'
 
 interface RecordsContextType {
   records: Record[]
   loading: boolean
   error: string | null
   initialized: boolean
+  currentRandomRecord: Record | null
   loadCollection: (username: string, force?: boolean) => Promise<void>
   refreshCollection: (username: string) => Promise<void>
   clearError: () => void
+  getRandomRecord: () => void
+  clearRandomRecord: () => void
 }
 
 const RecordsContext = createContext<RecordsContextType | undefined>(undefined)
@@ -21,6 +25,7 @@ export const RecordsProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [initialized, setInitialized] = useState(false)
+  const [currentRandomRecord, setCurrentRandomRecord] = useState<Record | null>(null)
   
   // Track ongoing operations to prevent duplicate calls
   const loadingRef = useRef<{ [username: string]: boolean }>({})
@@ -77,15 +82,32 @@ export const RecordsProvider: React.FC<{ children: ReactNode }> = ({ children })
     setError(null)
   }, [])
 
+  const getRandomRecord = useCallback(() => {
+    if (records.length === 0) {
+      console.warn('No records available for random selection')
+      return
+    }
+    
+    const randomRecord = getRandomRecordUtil(records)
+    setCurrentRandomRecord(randomRecord)
+  }, [records])
+
+  const clearRandomRecord = useCallback(() => {
+    setCurrentRandomRecord(null)
+  }, [])
+
   return (
     <RecordsContext.Provider value={{ 
       records, 
       loading, 
       error, 
       initialized,
+      currentRandomRecord,
       loadCollection, 
       refreshCollection, 
-      clearError 
+      clearError,
+      getRandomRecord,
+      clearRandomRecord
     }}>
       {children}
     </RecordsContext.Provider>

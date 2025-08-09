@@ -5,6 +5,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native'
 import DiscogsLoginScreen from './screens/DiscogsLoginScreen'
 import UserCollection from './screens/UserCollection'
 import LandingPage from './screens/LandingPage'
+import Queue from './screens/Queue'
 import { AuthProvider, useAuthContext } from './contexts/AuthContext'
 import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext'
 
@@ -12,6 +13,7 @@ export type RootStackParamList = {
   Home: undefined;
   Login: undefined;
   Collection: { username: string };
+  Queue: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -57,6 +59,11 @@ const AppNavigator = () => {
           component={UserCollection}
           initialParams={username ? { username } : undefined}
           options={{ title: 'My Collection' }}
+        />
+        <Stack.Screen
+          name="Queue"
+          component={Queue}
+          options={{ title: 'Queue' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

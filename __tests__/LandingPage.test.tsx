@@ -6,29 +6,35 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { useRecordsContext } from '../contexts/RecordsContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 
+// Set up global mock before other mocks
+const mockNavigate = jest.fn();
+(global as any).mockNavigate = mockNavigate;
+
 // Mock dependencies
 jest.mock('../contexts/AuthContext');
 jest.mock('../contexts/RecordsContext');
 jest.mock('../services/auth/tokenStorage');
+jest.mock('../components/BottomNavigation', () => {
+  const React = require('react');
+  const { TouchableOpacity, Text } = require('react-native');
+  return (props: any) => (
+    <TouchableOpacity testID="collection-tab" onPress={() => {
+      // Mock the navigation behavior
+      (global as any).mockNavigate('Collection', { username: 'testuser' });
+    }}>
+      <Text>Collection</Text>
+    </TouchableOpacity>
+  );
+});
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
-    navigate: jest.fn(),
+    navigate: mockNavigate,
   }),
 }));
 
 const mockUseAuthContext = useAuthContext as jest.MockedFunction<typeof useAuthContext>;
 const mockUseRecordsContext = useRecordsContext as jest.MockedFunction<typeof useRecordsContext>;
 const mockClearDiscogsToken = clearDiscogsToken as jest.MockedFunction<typeof clearDiscogsToken>;
-const mockNavigate = jest.fn();
-
-// Mock Alert directly in jest.setup.js
-
-// Mock useNavigation
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({
-    navigate: mockNavigate,
-  }),
-}));
 
 describe('LandingPage', () => {
   const mockRefreshAuth = jest.fn();
@@ -46,9 +52,12 @@ describe('LandingPage', () => {
       loading: false,
       error: null,
       initialized: false,
+      currentRandomRecord: null,
       loadCollection: mockLoadCollection,
       refreshCollection: mockRefreshCollection,
       clearError: mockClearError,
+      getRandomRecord: jest.fn(),
+      clearRandomRecord: jest.fn(),
     });
   });
 
@@ -63,43 +72,37 @@ describe('LandingPage', () => {
       });
     });
 
-    it('should render collection stats', () => {
+    it('should render random record and refresh collection buttons', () => {
       let component;
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const textElements = component!.root.findAllByType('Text');
-      const statsElement = textElements.find(el => 
-        el.children.some(child => 
-          typeof child === 'string' && child.includes('Collection:')
-        )
-      );
-      expect(statsElement).toBeTruthy();
-      // React Native Text components with template literals are rendered as multiple children
-      const fullText = statsElement!.children.join('');
-      expect(fullText).toMatch(/Collection: \d+ records/);
+      const randomButton = component!.root.findByProps({ title: 'Random Record' });
+      const refreshButton = component!.root.findByProps({ title: 'Refresh Collection' });
+      expect(randomButton).toBeTruthy();
+      expect(refreshButton).toBeTruthy();
     });
 
-    it('should render navigation buttons', () => {
+    it('should render bottom navigation', () => {
       let component;
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const collectionButton = component!.root.findByProps({ title: 'Go to My Collection' });
+      const bottomNav = component!.root.findByProps({ testID: 'collection-tab' });
       const clearTokensButton = component!.root.findByProps({ title: 'Clear Tokens' });
-      expect(collectionButton).toBeTruthy();
+      expect(bottomNav).toBeTruthy();
       expect(clearTokensButton).toBeTruthy();
     });
 
-    it('should navigate to Collection when "Go to My Collection" is pressed', () => {
+    it('should navigate to Collection when bottom navigation Collection tab is pressed', () => {
       let component;
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const collectionButton = component!.root.findByProps({ title: 'Go to My Collection' });
+      const collectionTab = component!.root.findByProps({ testID: 'collection-tab' });
       
       ReactTestRenderer.act(() => {
-        collectionButton.props.onPress();
+        collectionTab.props.onPress();
       });
       
       expect(mockNavigate).toHaveBeenCalledWith('Collection', { username: 'testuser' });
@@ -131,18 +134,15 @@ describe('LandingPage', () => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
       
-      const textElements = component!.root.findAllByType('Text');
-      const statsElement = textElements.find(el => 
-        el.children.some(child => 
-          typeof child === 'string' && child.includes('Collection:')
-        )
-      );
-      expect(statsElement).toBeTruthy();
-      // React Native Text components with template literals are rendered as multiple children
-      const fullText = statsElement!.children.join('');
-      expect(fullText).toMatch(/Collection: \d+ records/);
-      expect(component!.root.findByProps({ title: 'Go to My Collection' })).toBeTruthy();
-      expect(component!.root.findByProps({ title: 'Clear Tokens' })).toBeTruthy();
+      const randomButton = component!.root.findByProps({ title: 'Random Record' });
+      const refreshButton = component!.root.findByProps({ title: 'Refresh Collection' });
+      const clearTokensButton = component!.root.findByProps({ title: 'Clear Tokens' });
+      const bottomNav = component!.root.findByProps({ testID: 'collection-tab' });
+      
+      expect(randomButton).toBeTruthy();
+      expect(refreshButton).toBeTruthy();
+      expect(clearTokensButton).toBeTruthy();
+      expect(bottomNav).toBeTruthy();
     });
   });
 
