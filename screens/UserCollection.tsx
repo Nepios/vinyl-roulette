@@ -184,7 +184,6 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   item: {
-    width: '100%',
     marginBottom: 16,
     padding: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
