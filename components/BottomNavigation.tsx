@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../App'
 import { useAuthContext } from '../contexts/AuthContext'
+import { House, Disc, Turntable } from 'lucide-react-native'
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
@@ -51,13 +52,16 @@ const BottomNavigation = () => {
   }
 
   const getIcon = (screenName: string) => {
+    const isScreenActive = isActive(screenName)
+    const size = isScreenActive ? 22 : 20
+    
     switch (screenName) {
       case 'Home':
-        return '🏠'
+        return <House color={getIconColor('Home')} size={size} />
       case 'Collection':
-        return '💿'
+        return <Disc color={getIconColor('Collection', !username)} size={size} />
       case 'Queue':
-        return '📝'
+        return <Turntable color={getIconColor('Queue')} size={size} />
       default:
         return '❓'
     }
@@ -69,9 +73,9 @@ const BottomNavigation = () => {
         style={[styles.tab, isActive('Home') && styles.activeTab]} 
         onPress={navigateToHome}
       >
-        <Text style={[styles.icon, isActive('Home') && styles.activeIcon]}>
+        <View style={[styles.icon, isActive('Home') && styles.activeIcon]}>
           {getIcon('Home')}
-        </Text>
+        </View>
         <Text style={[styles.label, isActive('Home') && styles.activeLabel]}>Home</Text>
       </TouchableOpacity>
 
@@ -80,9 +84,9 @@ const BottomNavigation = () => {
         onPress={navigateToCollection}
         disabled={!username}
       >
-        <Text style={[styles.icon, isActive('Collection') && styles.activeIcon, !username && styles.disabledIcon]}>
+        <View style={[styles.icon, isActive('Collection') && styles.activeIcon, !username && styles.disabledIcon]}>
           {getIcon('Collection')}
-        </Text>
+        </View>
         <Text style={[styles.label, isActive('Collection') && styles.activeLabel, !username && styles.disabledLabel]}>Collection</Text>
       </TouchableOpacity>
 
@@ -90,9 +94,9 @@ const BottomNavigation = () => {
         style={[styles.tab, isActive('Queue') && styles.activeTab]} 
         onPress={navigateToQueue}
       >
-        <Text style={[styles.icon, isActive('Queue') && styles.activeIcon]}>
+        <View style={[styles.icon, isActive('Queue') && styles.activeIcon]}>
           {getIcon('Queue')}
-        </Text>
+        </View>
         <Text style={[styles.label, isActive('Queue') && styles.activeLabel]}>Queue</Text>
       </TouchableOpacity>
     </View>
@@ -124,11 +128,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   icon: {
-    fontSize: 20,
     marginBottom: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   activeIcon: {
-    fontSize: 22,
+    // Active icon styling handled by getIcon function
   },
   disabledIcon: {
     opacity: 0.5,
