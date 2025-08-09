@@ -10,10 +10,10 @@ import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext';
 
 export type RootStackParamList = {
-  Home: undefined;
-  Login: undefined;
-  Collection: { username: string };
-  Queue: undefined;
+  Home: { transitionDirection?: 'slide_from_left' | 'slide_from_right' } | undefined;
+  Login: { transitionDirection?: 'slide_from_left' | 'slide_from_right' } | undefined;
+  Collection: { username: string; transitionDirection?: 'slide_from_left' | 'slide_from_right' };
+  Queue: { transitionDirection?: 'slide_from_left' | 'slide_from_right' } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

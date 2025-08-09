@@ -19,12 +19,9 @@ export const useNavigationDirection = () => {
   const getTransitionDirection = (fromTab: string, toTab: string) => {
     const fromIndex = getTabIndex(fromTab);
     const toIndex = getTabIndex(toTab);
-    console.log(`Transitioning from ${fromIndex} to ${toIndex}`);
     if (fromIndex < toIndex) {
-      console.log("Moving forward");
       return 'slide_from_right'; // Moving forward in tab order - slide in from right
     } else if (fromIndex > toIndex) {
-      console.log("Moving backward");
       return 'slide_from_left'; // Moving backward in tab order - slide in from left
     }
     return 'slide_from_right'; // Default
