@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../App'
 import { useAuthContext } from '../contexts/AuthContext'
-import { House, Disc, Turntable, Disc3 } from 'lucide-react-native'
+import { House, Disc, Turntable } from 'lucide-react-native'
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>
 
