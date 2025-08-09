@@ -40,11 +40,5 @@ target 'VinylRoulette' do
 
 
     end
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        # Exclude arm64 for the iOS simulator
-        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-      end
-    end
   end
 end
