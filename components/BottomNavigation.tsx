@@ -18,6 +18,7 @@ const BottomNavigation = () => {
     routeName = route.name
   } catch (error) {
     // If useRoute fails (in tests), default to 'Home'
+    console.error('Error getting route name in BottomNavigation:', error);
     routeName = 'Home'
   }
 
