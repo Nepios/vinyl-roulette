@@ -43,11 +43,19 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Home"
+        screenOptions={() => ({
+          animation: 'slide_from_right', // Default animation
+          customAnimationOnGesture: true,
+          fullScreenGestureEnabled: true,
+        })}
       >
         <Stack.Screen
           name="Home"
           component={LandingPage}
-          options={{ title: 'Vinyl Roulette' }}
+          options={({ route }) => ({
+            title: 'Vinyl Roulette',
+            animation: route.params?._transitionDirection === 'slide_from_left' ? 'slide_from_left' : 'slide_from_right',
+          })}
         />
         <Stack.Screen
           name="Login"
@@ -58,12 +66,18 @@ const AppNavigator = () => {
           name="Collection" 
           component={UserCollection}
           initialParams={username ? { username } : undefined}
-          options={{ title: 'My Collection' }}
+          options={({ route }) => ({
+            title: 'My Collection',
+            animation: route.params?._transitionDirection === 'slide_from_left' ? 'slide_from_left' : 'slide_from_right',
+          })}
         />
         <Stack.Screen
           name="Queue"
           component={Queue}
-          options={{ title: 'Queue' }}
+          options={({ route }) => ({
+            title: 'Queue',
+            animation: route.params?._transitionDirection === 'slide_from_left' ? 'slide_from_left' : 'slide_from_right',
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>
