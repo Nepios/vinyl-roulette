@@ -9,7 +9,7 @@ VinylRoulette is a React Native mobile app that allows users to import their vin
 ## Common Development Commands
 
 - `npm start` - Start Metro bundler for React Native development
-- `npm run android` - Build and run Android app 
+- `npm run android` - Build and run Android app
 - `npm run ios` - Build and run iOS app (requires CocoaPods setup)
 - `npm run lint` - Run ESLint on the codebase
 - `npm test` - Run Jest tests
@@ -17,6 +17,7 @@ VinylRoulette is a React Native mobile app that allows users to import their vin
 ### iOS Setup Requirements
 
 For iOS development, run these commands after cloning or updating native dependencies:
+
 ```bash
 bundle install
 bundle exec pod install
@@ -30,7 +31,7 @@ bundle exec pod install
 - **contexts/AuthContext.tsx** - Authentication state management using React Context
 - **database/** - SQLite database layer with schema, services, and migrations
   - `database.ts` - Core database initialization and utilities
-  - `schema.ts` - Database table definitions  
+  - `schema.ts` - Database table definitions
   - `collectionService.ts` - Record collection data access layer
   - `syncService.ts` - Handles syncing with Discogs API
 - **services/discogsApi.ts** - Discogs API integration with OAuth authentication
@@ -49,6 +50,7 @@ bundle exec pod install
 ### Authentication Flow
 
 The app uses Discogs OAuth 1.0a for authentication:
+
 1. User initiates login through DiscogsLoginScreen
 2. OAuth flow handled by services/auth/ modules
 3. Tokens stored securely using react-native-keychain
@@ -57,6 +59,7 @@ The app uses Discogs OAuth 1.0a for authentication:
 ### Database Layer
 
 SQLite database stores user's record collection locally:
+
 - **records** table - Stores individual record information
 - **metadata** table - Stores sync and app metadata
 - Collection sync service fetches paginated data from Discogs API
