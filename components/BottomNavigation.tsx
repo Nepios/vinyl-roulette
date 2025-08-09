@@ -1,16 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { RootStackParamList } from '../App'
+import { useRoute } from '@react-navigation/native'
 import { useAuthContext } from '../contexts/AuthContext'
+import { useNavigationDirection } from '../hooks/useNavigationDirection'
 import { House, Disc, Turntable } from 'lucide-react-native'
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>
-
 const BottomNavigation = () => {
-  const navigation = useNavigation<NavigationProp>()
   const { username, isAuthorized } = useAuthContext()
+  const { navigateWithDirection, setCurrentRoute } = useNavigationDirection()
 
   // Handle route safely for tests
   let routeName = 'Home'
@@ -23,23 +20,28 @@ const BottomNavigation = () => {
     routeName = 'Home'
   }
 
+  // Update current route when component mounts or route changes
+  useEffect(() => {
+    setCurrentRoute(routeName)
+  }, [routeName, setCurrentRoute])
+
   // Don't show bottom nav on login screen or if not authorized
   if (routeName === 'Login' || !isAuthorized) {
     return null
   }
 
   const navigateToHome = () => {
-    navigation.navigate('Home')
+    navigateWithDirection('Home')
   }
 
   const navigateToCollection = () => {
     if (username) {
-      navigation.navigate('Collection', { username })
+      navigateWithDirection('Collection', { username })
     }
   }
 
   const navigateToQueue = () => {
-    navigation.navigate('Queue')
+    navigateWithDirection('Queue')
   }
 
   const isActive = (screenName: string) => {

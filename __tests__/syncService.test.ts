@@ -57,7 +57,7 @@ describe('syncService', () => {
     });
 
     it('should fetch data when sync is stale', async () => {
-      const staleTimestamp = 1000000000 - (1000 * 60 * 2); // 2 minutes ago (stale)
+      const staleTimestamp = 1000000000 - (1000 * 60 * 61); // 61 minutes ago (stale)
       mockGetLastSyncTime.mockResolvedValue(staleTimestamp);
       mockFetchUserCollection.mockResolvedValue(mockRecords);
       mockSaveRecords.mockResolvedValue(undefined);
@@ -127,7 +127,7 @@ describe('syncService', () => {
 
     it('should log sync status correctly', async () => {
       const consoleLogSpy = jest.spyOn(console, 'log');
-      const staleTimestamp = 1000000000 - (1000 * 60 * 2); // 2 minutes ago (stale)
+      const staleTimestamp = 1000000000 - (1000 * 60 * 61); // 61 minutes ago (stale)
       
       mockGetLastSyncTime.mockResolvedValue(staleTimestamp);
       mockFetchUserCollection.mockResolvedValue(mockRecords);
@@ -167,13 +167,13 @@ describe('syncService', () => {
       expect(mockUpdateLastSyncTime).toHaveBeenCalledWith(1000000000);
     });
 
-    it('should use correct sync interval (1 minute)', async () => {
-      // Test that the sync interval is 1 minute (60,000 ms)
-      const justOverOneMinute = 1000000000 - (1000 * 60 + 1); // Just over 1 minute ago
-      const justUnderOneMinute = 1000000000 - (1000 * 59); // 59 seconds ago
+    it('should use correct sync interval (1 hour)', async () => {
+      // Test that the sync interval is 1 hour (3,600,000 ms)
+      const justOverOneHour = 1000000000 - (1000 * 60 * 60 + 1); // Just over 1 hour ago
+      const justUnderOneHour = 1000000000 - (1000 * 60 * 59); // 59 minutes ago
       
-      // Should be stale when over 1 minute
-      mockGetLastSyncTime.mockResolvedValue(justOverOneMinute);
+      // Should be stale when over 1 hour
+      mockGetLastSyncTime.mockResolvedValue(justOverOneHour);
       mockFetchUserCollection.mockResolvedValue(mockRecords);
       mockSaveRecords.mockResolvedValue(undefined);
       mockUpdateLastSyncTime.mockReturnValue(undefined);
@@ -183,8 +183,8 @@ describe('syncService', () => {
 
       jest.clearAllMocks();
 
-      // Should not be stale at just under 1 minute
-      mockGetLastSyncTime.mockResolvedValue(justUnderOneMinute);
+      // Should not be stale at just under 1 hour
+      mockGetLastSyncTime.mockResolvedValue(justUnderOneHour);
 
       result = await syncIfStale(mockUsername);
       expect(result).toBe('skipped');
