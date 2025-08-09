@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react'
-import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react'
+import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
@@ -7,17 +7,28 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 import { useRecordsContext } from '../contexts/RecordsContext'
 import BottomNavigation from '../components/BottomNavigation';
+const turntableImage = require('../assets/images/record-player.png');
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { isAuthorized, refreshAuth, username } = useAuthContext();
   const { records, loading, error, refreshCollection, clearError, currentRandomRecord, getRandomRecord } = useRecordsContext();
+  const [showTooltip, setShowTooltip] = useState(true);
 
   useEffect(() => {
     if (isAuthorized === false) {
       navigation.navigate('Login');
     }
   }, [isAuthorized, navigation]);
+
+  // Hide tooltip after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleClearTokens = async () => {
     try {
@@ -73,6 +84,20 @@ const LandingPage = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.turntableContainer}>
+        <TouchableOpacity 
+          onPress={handleRandomRecord}
+          disabled={records.length === 0 || loading}
+        >
+          <Image source={turntableImage} style={styles.turntableImage} />
+        </TouchableOpacity>
+        {showTooltip && (
+          <View style={styles.tooltip}>
+            <Text style={styles.tooltipText}>Tap for random record</Text>
+          </View>
+        )}
+      </View>
+      
       <View style={styles.content}>
         {error && (
           <View style={styles.errorContainer}>
@@ -81,19 +106,6 @@ const LandingPage = () => {
             <Button title="Retry" onPress={handleRefreshCollection} />
           </View>
         )}
-        <View style={styles.buttonContainer}>
-          <Button 
-            title="Random Record" 
-            onPress={handleRandomRecord}
-            disabled={records.length === 0 || loading}
-          />
-          <Button 
-            title="Refresh Collection" 
-            onPress={handleRefreshCollection}
-            disabled={!username || loading}
-          />
-          <Button title="Clear Tokens" onPress={handleClearTokens} />
-        </View>
 
         {currentRandomRecord && (
           <View style={styles.recordContainer}>
@@ -124,6 +136,9 @@ const LandingPage = () => {
           </View>
         )}
       </View>
+      {/* <View style={styles.buttonContainer}>
+          <Button title="Clear Tokens" onPress={handleClearTokens} />
+        </View> */}
       <BottomNavigation />
     </View>
   );
@@ -136,9 +151,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 16,
+    paddingTop: 24,
   },
   loadingContainer: {
     flex: 1,
@@ -177,7 +193,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   recordContainer: {
-    marginTop: 20,
+    marginTop: 0,
     padding: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
@@ -188,7 +204,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     width: '100%',
-    minHeight: 300,
+    flex: 1,
   },
   recordTitle: {
     fontWeight: 'bold',
@@ -239,6 +255,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '100%',
     marginTop: 10,
+  },
+  turntableContainer: {
+    position: 'relative',
+    width: '100%',
+  },
+  turntableImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+  },
+  tooltip: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -70 }, { translateY: -15 }],
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  tooltipText: {
+    color: '#f4f1eb',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });
 
