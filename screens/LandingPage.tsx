@@ -19,7 +19,7 @@ const LandingPage = () => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   
   // Get screen dimensions
-  const { width: screenWidth } = Dimensions.get('window');
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
   useEffect(() => {
     if (isAuthorized === false) {
@@ -130,6 +130,26 @@ const LandingPage = () => {
     };
   };
 
+  // Dynamic record container height based on screen size
+  const getRecordContainerStyle = () => {
+    // Calculate available space after turntable (200px) and bottom nav (~100px)
+    const availableHeight = screenHeight - 200 - 100 - 120; // 120 for header + margins
+    
+    // For larger screens, limit the container height to prevent excessive blank space
+    if (screenHeight > 800) {
+      return {
+        maxHeight: Math.min(availableHeight, 350),
+        minHeight: 250,
+      };
+    }
+    
+    // For smaller screens, use flex to fill available space
+    return {
+      flex: 1,
+      minHeight: 200,
+    };
+  };
+
   if (loading && records.length === 0) {
     return (
       <View style={styles.loadingContainer}>
@@ -171,8 +191,8 @@ const LandingPage = () => {
         )}
 
         {currentRandomRecord && (
-          <View style={styles.recordContainer}>
-            <Text style={styles.recordTitle} >
+          <View style={[styles.recordContainer, getRecordContainerStyle()]}>
+            <Text style={styles.recordTitle} numberOfLines={3} ellipsizeMode="tail">
               {currentRandomRecord.title} 
             </Text>
             <Text style={styles.artist} >
@@ -267,13 +287,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     width: '100%',
-    flex: 1,
+    justifyContent: 'space-around',
+    overflow: 'hidden',
   },
   recordTitle: {
     fontWeight: 'bold',
     fontSize: 18,
     textAlign: 'center',
     width: '100%',
+    flexShrink: 1,
   },
   artist: {
     marginTop: 8,
