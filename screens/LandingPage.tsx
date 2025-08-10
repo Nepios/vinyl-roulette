@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
-import { useRecordsContext } from '../contexts/RecordsContext'
+import { useRecordsContext } from '../contexts/RecordsContext';
+import { useQueueContext } from '../contexts/QueueContext';
 import BottomNavigation from '../components/BottomNavigation';
 import { hasDynamicIsland, getTurntableMarginTop, getContentMarginTop } from '../utils/deviceUtils';
 const turntableImage = require('../assets/images/record-player.png');
@@ -16,9 +18,11 @@ const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { isAuthorized, refreshAuth, username } = useAuthContext();
   const { records, loading, error, refreshCollection, clearError, currentRandomRecord, getRandomRecord } = useRecordsContext();
+  const { addToQueue, queueCount, refreshQueue } = useQueueContext();
   const [showTooltip, setShowTooltip] = useState(true);
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
   
   // Get screen dimensions
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -35,6 +39,13 @@ const LandingPage = () => {
       navigation.navigate('Login');
     }
   }, [isAuthorized, navigation]);
+
+  // Refresh queue on component mount
+  useEffect(() => {
+    if (isAuthorized) {
+      refreshQueue();
+    }
+  }, [isAuthorized, refreshQueue]);
 
   // Hide tooltip after 3 seconds
   useEffect(() => {
@@ -105,6 +116,89 @@ const LandingPage = () => {
     }
   };
 
+  const handleAddToQueue = async (showAlert: boolean = true) => {
+    if (!currentRandomRecord) {
+      if (showAlert) Alert.alert('No Record', 'Please select a random record first.');
+      return false;
+    }
+
+    const success = await addToQueue(currentRandomRecord);
+    if (success) {
+      if (showAlert) {
+        Alert.alert('Added to Queue', `"${currentRandomRecord.title}" has been added to your queue!`);
+      }
+      
+      // Get a new random record after successful add
+      setTimeout(() => {
+        getRandomRecord();
+      }, 300);
+      
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const handleRejectRecord = () => {
+    if (currentRandomRecord) {
+      console.log(`🚫 Rejected: ${currentRandomRecord.title}`);
+      
+      // Get a new random record after rejection
+      setTimeout(() => {
+        getRandomRecord();
+      }, 300);
+    }
+  };
+
+  const onPanGestureEvent = Animated.event(
+    [{ nativeEvent: { translationX: translateX } }],
+    { useNativeDriver: true }
+  );
+
+  const onHandlerStateChange = async (event: any) => {
+    if (event.nativeEvent.state === State.END) {
+      const { translationX: tx } = event.nativeEvent;
+      
+      // If swiped right more than 100px, add to queue
+      if (tx > 100 && currentRandomRecord) {
+        // Animate further right to indicate success
+        Animated.timing(translateX, {
+          toValue: screenWidth,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(async () => {
+          // Reset position instantly (off-screen)
+          translateX.setValue(0);
+          // Add to queue without alert (silent)
+          await handleAddToQueue(false);
+        });
+      } 
+      // If swiped left more than 100px, reject record
+      else if (tx < -100 && currentRandomRecord) {
+        // Animate further left to indicate rejection
+        Animated.timing(translateX, {
+          toValue: -screenWidth,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          // Reset position instantly (off-screen)
+          translateX.setValue(0);
+          // Reject and get new record
+          handleRejectRecord();
+        });
+      } 
+      // If swipe wasn't far enough, reset position
+      else {
+        Animated.spring(translateX, {
+          toValue: 0,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }).start();
+      }
+    }
+  };
+
   // Animated style for turntable
   const animatedStyle = {
     transform: [
@@ -116,6 +210,16 @@ const LandingPage = () => {
       },
       { scale: scaleAnim }
     ],
+  };
+
+  // Animated style for record card with color feedback
+  const recordCardAnimatedStyle = {
+    transform: [{ translateX }],
+    backgroundColor: translateX.interpolate({
+      inputRange: [-100, 0, 100],
+      outputRange: ['rgba(220, 38, 127, 0.3)', 'rgba(255, 255, 255, 0.1)', 'rgba(123, 150, 90, 0.4)'],
+      extrapolate: 'clamp',
+    }),
   };
 
   // Memoized parsed artists to avoid repeated JSON parsing
@@ -205,32 +309,44 @@ const LandingPage = () => {
         )}
 
         {currentRandomRecord && (
-          <View style={[styles.recordContainer, getRecordContainerStyle()]}>
-            <Text style={styles.recordTitle} numberOfLines={3} ellipsizeMode="tail">
-              {currentRandomRecord.title} 
-            </Text>
-            <Text style={styles.artist} >
-              {displayArtists}
-            </Text>
-            <View style={styles.imageContainer}>
-              {currentRandomRecord.cover_image ? (
-                <Image 
-                  source={{ uri: currentRandomRecord.cover_image }} 
-                  style={styles.coverImage}
-                  onError={() => console.log('Failed to load cover image')}
-                />
-              ) : (
-                <View style={styles.placeholderImage}>
-                  <Text style={styles.placeholderText}>No Image</Text>
-                </View>
-              )}
-            </View>
+          <PanGestureHandler
+            onGestureEvent={onPanGestureEvent}
+            onHandlerStateChange={onHandlerStateChange}
+          >
+            <Animated.View style={[
+              styles.recordContainer, 
+              getRecordContainerStyle(),
+              recordCardAnimatedStyle
+            ]}>
+              <Text style={styles.recordTitle} numberOfLines={3} ellipsizeMode="tail">
+                {currentRandomRecord.title} 
+              </Text>
+              <Text style={styles.artist} >
+                {displayArtists}
+              </Text>
+              <View style={styles.imageContainer}>
+                {currentRandomRecord.cover_image ? (
+                  <Image 
+                    source={{ uri: currentRandomRecord.cover_image }} 
+                    style={styles.coverImage}
+                    onError={() => console.log('Failed to load cover image')}
+                  />
+                ) : (
+                  <View style={styles.placeholderImage}>
+                    <Text style={styles.placeholderText}>No Image</Text>
+                  </View>
+                )}
+              </View>
 
-            <Text style={styles.year}>
-              {currentRandomRecord.year}
-            </Text>
-
-          </View>
+              <Text style={styles.year}>
+                {currentRandomRecord.year}
+              </Text>
+              
+              <Text style={styles.swipeHint}>
+                ← Swipe left to skip | Swipe right to queue →
+              </Text>
+            </Animated.View>
+          </PanGestureHandler>
         )}
       </View>
       {/* <View style={styles.buttonContainer}>
@@ -354,6 +470,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '100%',
     marginTop: 10,
+  },
+  swipeHint: {
+    fontSize: 12,
+    color: 'rgba(244, 241, 235, 0.6)',
+    textAlign: 'center',
+    width: '100%',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   turntableContainer: {
     position: 'relative',

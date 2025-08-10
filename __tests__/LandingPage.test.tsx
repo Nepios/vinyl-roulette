@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import LandingPage from '../screens/LandingPage';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useRecordsContext } from '../contexts/RecordsContext';
+import { useQueueContext } from '../contexts/QueueContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 
 // Set up global mock before other mocks
@@ -13,6 +14,7 @@ const mockNavigate = jest.fn();
 // Mock dependencies
 jest.mock('../contexts/AuthContext');
 jest.mock('../contexts/RecordsContext');
+jest.mock('../contexts/QueueContext');
 jest.mock('../services/auth/tokenStorage');
 jest.mock('../components/BottomNavigation', () => {
   const React = require('react');
@@ -39,6 +41,7 @@ jest.mock('../utils/deviceUtils', () => ({
 
 const mockUseAuthContext = useAuthContext as jest.MockedFunction<typeof useAuthContext>;
 const mockUseRecordsContext = useRecordsContext as jest.MockedFunction<typeof useRecordsContext>;
+const mockUseQueueContext = useQueueContext as jest.MockedFunction<typeof useQueueContext>;
 const mockClearDiscogsToken = clearDiscogsToken as jest.MockedFunction<typeof clearDiscogsToken>;
 
 describe('LandingPage', () => {
@@ -46,6 +49,8 @@ describe('LandingPage', () => {
   const mockRefreshCollection = jest.fn();
   const mockClearError = jest.fn();
   const mockLoadCollection = jest.fn();
+  const mockAddToQueue = jest.fn();
+  const mockRefreshQueue = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,6 +68,20 @@ describe('LandingPage', () => {
       clearError: mockClearError,
       getRandomRecord: jest.fn(),
       clearRandomRecord: jest.fn(),
+    });
+
+    // Default QueueContext mock
+    mockUseQueueContext.mockReturnValue({
+      queue: [],
+      queueCount: 0,
+      loading: false,
+      error: null,
+      addToQueue: mockAddToQueue,
+      removeFromQueue: jest.fn(),
+      clearQueue: jest.fn(),
+      isInQueue: jest.fn(() => false),
+      refreshQueue: mockRefreshQueue,
+      clearError: jest.fn(),
     });
   });
 

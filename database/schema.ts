@@ -19,4 +19,13 @@ CREATE TABLE IF NOT EXISTS metadata (
   value TEXT
 )`;
 
-export const createTables = [createRecordsTable, createMetadataTable];
+export const createQueueTable = `
+CREATE TABLE IF NOT EXISTS queue (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  record_id INTEGER NOT NULL,
+  date_added TEXT DEFAULT (datetime('now')),
+  play_order INTEGER,
+  FOREIGN KEY (record_id) REFERENCES records (id) ON DELETE CASCADE
+)`;
+
+export const createTables = [createRecordsTable, createMetadataTable, createQueueTable];

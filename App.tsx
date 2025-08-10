@@ -3,12 +3,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import DiscogsLoginScreen from './screens/DiscogsLoginScreen';
 import UserCollection from './screens/UserCollection';
 import LandingPage from './screens/LandingPage';
 import Queue from './screens/Queue';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext';
+import { QueueProvider } from './contexts/QueueContext';
 import { getDynamicIslandTopPadding } from './utils/deviceUtils';
 
 export type RootStackParamList = {
@@ -114,13 +116,17 @@ const AppNavigator = () => {
 
 const App = () => {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <RecordsProvider>
-          <AppNavigator />
-        </RecordsProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <RecordsProvider>
+            <QueueProvider>
+              <AppNavigator />
+            </QueueProvider>
+          </RecordsProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 
