@@ -1,11 +1,19 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import BottomNavigation from '../components/BottomNavigation'
+import { hasDynamicIsland } from '../utils/deviceUtils'
 
 const Queue = () => {
+  // Dynamic Island detection and spacing
+  const isDynamicIsland = hasDynamicIsland()
+
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView style={styles.container}>
+      <View style={[
+        styles.content,
+        isDynamicIsland && styles.dynamicIslandPadding
+      ]}>
         <Text style={styles.title}>Queue</Text>
         <Text style={styles.subtitle}>Coming Soon</Text>
         <Text style={styles.description}>
@@ -13,7 +21,7 @@ const Queue = () => {
         </Text>
       </View>
       <BottomNavigation />
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -27,6 +35,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  dynamicIslandPadding: {
+    paddingTop: 28, // 20 (existing) + 8 (dynamic island)
   },
   title: {
     fontSize: 24,

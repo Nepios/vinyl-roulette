@@ -1,5 +1,6 @@
 import SQLite from 'react-native-sqlite-2';
 import { createRecordsTable, createMetadataTable } from './schema';
+import { runMigrations } from './migrations';
 
 const db = SQLite.openDatabase('vinyl.db', '1.0', '', 1);
 
@@ -31,8 +32,13 @@ export const initDatabase = (): Promise<void> => {
         (error) => {
           reject(new Error(`Database initialization failed: ${error.message}`));
         },
-        () => {
-          resolve();
+        async () => {
+          try {
+            await runMigrations();
+            resolve();
+          } catch (migrationError) {
+            reject(new Error(`Database migrations failed: ${migrationError instanceof Error ? migrationError.message : String(migrationError)}`));
+          }
         }
       );
     } catch (error) {

@@ -1,6 +1,6 @@
 import { saveRecords, getAllRecords, getLastSyncTime, updateLastSyncTime } from '../database/collectionService';
 import { CollectionRelease } from '../services/discogsApi';
-import { Record } from '../screens/UserCollection';
+import { Record } from '../types/Record';
 
 // Mock the database
 const mockExecuteSql = jest.fn();

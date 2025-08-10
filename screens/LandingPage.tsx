@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
@@ -7,6 +8,7 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
 import { useRecordsContext } from '../contexts/RecordsContext'
 import BottomNavigation from '../components/BottomNavigation';
+import { hasDynamicIsland, getTurntableMarginTop, getContentMarginTop } from '../utils/deviceUtils';
 const turntableImage = require('../assets/images/record-player.png');
 const recordImage = require('../assets/images/vinyl-record.png'); 
 
@@ -20,6 +22,13 @@ const LandingPage = () => {
   
   // Get screen dimensions
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  
+  // Dynamic Island detection and spacing
+  const isDynamicIsland = hasDynamicIsland();
+  
+  // Responsive margins based on screen size
+  const turntableMarginTop = getTurntableMarginTop();
+  const contentMarginTop = getContentMarginTop();
 
   useEffect(() => {
     if (isAuthorized === false) {
@@ -152,19 +161,24 @@ const LandingPage = () => {
 
   if (loading && records.length === 0) {
     return (
-      <View style={styles.loadingContainer}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
         <Text style={styles.loadingText}>Loading your collection...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.turntableContainer}>
+    <SafeAreaView style={styles.container}>
+      <View style={[
+        styles.turntableContainer, 
+        { marginTop: turntableMarginTop },
+        isDynamicIsland && styles.dynamicIslandPadding
+      ]}>
         <TouchableOpacity 
           onPress={handleRandomRecord}
           disabled={records.length === 0 || loading}
+          testID="turntable-button"
         >
           <View style={styles.turntableWrapper}>
             <Image source={turntableImage} style={styles.turntableImage} />
@@ -181,7 +195,7 @@ const LandingPage = () => {
         )}
       </View>
       
-      <View style={styles.content}>
+      <View style={[styles.content, { marginTop: contentMarginTop }]}>
         {error && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
@@ -223,7 +237,7 @@ const LandingPage = () => {
           <Button title="Clear Tokens" onPress={handleClearTokens} />
         </View> */}
       <BottomNavigation />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -344,6 +358,9 @@ const styles = StyleSheet.create({
   turntableContainer: {
     position: 'relative',
     width: '100%',
+  },
+  dynamicIslandPadding: {
+    paddingTop: 8,
   },
   turntableWrapper: {
     width: '100%',

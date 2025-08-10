@@ -77,3 +77,7 @@ yarn-error.log
 # Ignore all .env files
 *.env
 **/*.env
+
+#Ignore Progress logs
+/progressLogs
+
