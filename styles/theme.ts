@@ -25,6 +25,7 @@ export const colors = {
     info: '#2196F3',           // Blue for info
     queue: '#76AF50',          // Green for queue-related actions
     reject: '#DC262F',         // Red for reject actions
+    dark: '#0d4c3c',          // Dark green for additional actions
   },
 
   // Status and feedback colors
@@ -67,9 +68,9 @@ export const colors = {
   // Shadow colors
   shadow: {
     default: '#000',           // Standard shadow color
-    light: 'rgba(0, 0, 0, 0.1)', // Light shadow opacity
-    medium: 'rgba(0, 0, 0, 0.25)', // Medium shadow opacity
-    heavy: 'rgba(0, 0, 0, 0.5)',   // Heavy shadow opacity
+    light: '0.1', // Light shadow opacity
+    medium: '0.25', // Medium shadow opacity
+    heavy: '0.5',   // Heavy shadow opacity
   },
 
   // Navigation specific colors
