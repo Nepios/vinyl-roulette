@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
+    "summarize": "echo '📝 Creating progress summary...' && ./scripts/summarize-progress.sh",
     "prep": "echo '🔍 Running lint...' && npm run lint; echo '🧪 Running tests...' && npm run test; echo '🛡️  Running secret scan...' && ggshield secret scan repo https://github.com/Nepios/vinyl-roulette.git; echo '✅ Prep completed!'"
   },
   "dependencies": {

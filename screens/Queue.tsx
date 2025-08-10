@@ -5,6 +5,7 @@ import BottomNavigation from '../components/BottomNavigation'
 import { hasDynamicIsland } from '../utils/deviceUtils'
 import { useQueueContext } from '../contexts/QueueContext'
 import { QueueItem } from '../database/queueService'
+import { colors, spacing, borderRadius, shadows, typography } from '../styles/theme'
 
 const Queue = () => {
   // Dynamic Island detection and spacing
@@ -78,7 +79,6 @@ const Queue = () => {
               <Image 
                 source={{ uri: item.cover_image }} 
                 style={styles.coverImage}
-                onError={() => console.log('Failed to load cover image for:', item.title)}
               />
             ) : (
               <View style={styles.placeholderImage}>
@@ -112,7 +112,7 @@ const Queue = () => {
     if (loading && queue.length === 0) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#f4f1eb" />
+          <ActivityIndicator size="large" color={colors.text.primary} />
           <Text style={styles.loadingText}>Loading queue...</Text>
         </View>
       )
@@ -176,117 +176,117 @@ const Queue = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2d5a4a',
+    backgroundColor: colors.background.primary,
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: spacing.base,
   },
   dynamicIslandPadding: {
-    paddingTop: 24, // 16 (existing) + 8 (dynamic island)
+    paddingTop: spacing.lg, // 16 (existing) + 8 (dynamic island)
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.base,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#f4f1eb',
+    fontSize: typography.fontSize.xxxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   clearButton: {
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 6,
-    backgroundColor: 'rgba(123,150, 90, 0.8)',
-    borderRadius: 6,
+    backgroundColor: colors.accent.success,
+    borderRadius: borderRadius.sm,
   },
   clearButtonText: {
-    color: '#f4f1eb',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.text.primary,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
   },
   list: {
-    paddingBottom: 16,
+    paddingBottom: spacing.base,
   },
   item: {
-    marginBottom: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.base,
     overflow: 'hidden',
   },
   itemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: spacing.sm,
   },
   playOrder: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(244, 241, 235, 0.2)',
+    backgroundColor: colors.secondary.background,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: spacing.sm,
   },
   playOrderText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#f4f1eb',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
   imageContainer: {
-    marginRight: 12,
+    marginRight: spacing.sm,
   },
   coverImage: {
     width: 50,
     height: 50,
-    borderRadius: 4,
+    borderRadius: borderRadius.sm,
   },
   placeholderImage: {
     width: 50,
     height: 50,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.background.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
   placeholderText: {
-    color: 'rgba(244, 241, 235, 0.5)',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.text.disabled,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
   },
   textContainer: {
     flex: 1,
-    marginRight: 12,
+    marginRight: spacing.sm,
   },
   title: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#f4f1eb',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   artist: {
-    fontSize: 12,
-    color: 'rgba(244, 241, 235, 0.8)',
+    fontSize: typography.fontSize.sm,
+    color: colors.secondary.muted,
     marginBottom: 2,
   },
   year: {
     fontSize: 11,
-    color: 'rgba(244, 241, 235, 0.6)',
+    color: colors.secondary.muted,
   },
   removeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(123,150, 90, 0.9)',
+    backgroundColor: colors.accent.queue,
     justifyContent: 'center',
     alignItems: 'center',
   },
   removeButtonText: {
-    color: '#f4f1eb',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.text.primary,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
   },
   loadingContainer: {
     flex: 1,
@@ -294,9 +294,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#f4f1eb',
+    marginTop: spacing.base,
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     opacity: 0.8,
   },
   errorContainer: {
@@ -306,21 +306,21 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   errorText: {
-    color: '#dc262f',
+    color: colors.status.error,
     textAlign: 'center',
-    marginBottom: 16,
-    fontSize: 16,
+    marginBottom: spacing.base,
+    fontSize: typography.fontSize.base,
   },
   retryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(244, 241, 235, 0.2)',
-    borderRadius: 6,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.secondary.background,
+    borderRadius: borderRadius.sm,
   },
   retryButtonText: {
-    color: '#f4f1eb',
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.text.primary,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
   },
   emptyContainer: {
     flex: 1,
@@ -329,15 +329,15 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#f4f1eb',
-    marginBottom: 12,
+    fontSize: typography.fontSize.xxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   emptyText: {
-    fontSize: 14,
-    color: 'rgba(244, 241, 235, 0.8)',
+    fontSize: typography.fontSize.base,
+    color: colors.secondary.muted,
     textAlign: 'center',
     lineHeight: 20,
   },

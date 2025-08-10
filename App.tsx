@@ -12,6 +12,7 @@ import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext';
 import { QueueProvider } from './contexts/QueueContext';
 import { getDynamicIslandTopPadding } from './utils/deviceUtils';
+import { colors } from './styles/theme';
 
 export type RootStackParamList = {
   Home: { transitionDirection?: 'slide_from_left' | 'slide_from_right' } | undefined;
@@ -45,7 +46,7 @@ const AppNavigator = () => {
   if (authLoading) {
     return (
       <View style={styles.loadingContainer} testID="loading-container">
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={colors.status.loading} />
       </View>
     );
   }
@@ -68,9 +69,9 @@ const AppNavigator = () => {
             title: 'Vinyl Roulette',
             headerShown: true,
             headerStyle: {
-              backgroundColor: '#2d5a4a',
+              backgroundColor: colors.navigation.headerBackground,
             },
-            headerTintColor: '#f4f1eb',
+            headerTintColor: colors.navigation.headerText,
             headerTitleStyle: {
               fontWeight: '600',
               paddingTop: getDynamicIslandTopPadding(),
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.white,
   },
 });
 
