@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
-import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
@@ -8,7 +8,7 @@ import { clearDiscogsToken } from '../services/auth/tokenStorage';
 import { useRecordsContext } from '../contexts/RecordsContext'
 import BottomNavigation from '../components/BottomNavigation';
 const turntableImage = require('../assets/images/record-player.png');
-const recordImage = require('../assets/images/vinyl-record.png'); // Add this image file
+const recordImage = require('../assets/images/vinyl-record.png'); 
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -17,6 +17,9 @@ const LandingPage = () => {
   const [showTooltip, setShowTooltip] = useState(true);
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  
+  // Get screen dimensions
+  const { width: screenWidth } = Dimensions.get('window');
 
   useEffect(() => {
     if (isAuthorized === false) {
@@ -116,6 +119,17 @@ const LandingPage = () => {
     }
   }, [currentRandomRecord?.artists]);
 
+  // Dynamic positioning based on screen width
+  const getRecordImageStyle = (screenWidth: number) => {
+    // Calculate left position as a ratio of screen width
+    // Adjust these values based on your turntable image proportions
+    const leftPercentage = screenWidth < 375 ? 0.39 : screenWidth < 414 ? 0.415 : 0.425;
+    
+    return {
+      left: screenWidth * leftPercentage - 150, // Subtract half width to center
+    };
+  };
+
   if (loading && records.length === 0) {
     return (
       <View style={styles.loadingContainer}>
@@ -136,7 +150,7 @@ const LandingPage = () => {
             <Image source={turntableImage} style={styles.turntableImage} />
             <Animated.Image 
               source={recordImage} 
-              style={[styles.recordImage, animatedStyle]} 
+              style={[styles.recordImage, getRecordImageStyle(screenWidth), animatedStyle]} 
             />
           </View>
         </TouchableOpacity>
@@ -321,13 +335,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   recordImage: {
-    width:  300, // Adjust size to match the record on the turntable
+    width: 300, // Adjust size to match the record on the turntable
     height: 300,
     position: 'absolute',
     top: '50%',
-    left: '41.4%',
     marginTop: -150, // Half of height to center
-    marginLeft: -150, // Half of width to center
     resizeMode: 'contain',
   },
   tooltip: {
