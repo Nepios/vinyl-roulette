@@ -1,15 +1,13 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { Alert } from 'react-native';
 import LandingPage from '../screens/LandingPage';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useRecordsContext } from '../contexts/RecordsContext';
 import { useQueueContext } from '../contexts/QueueContext';
-import { clearDiscogsToken } from '../services/auth/tokenStorage';
 
 // Set up global mock before other mocks
 const mockNavigate = jest.fn();
-(global as any).mockNavigate = mockNavigate;
+(global as any).mockNavigate = mockNavigate; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // Mock dependencies
 jest.mock('../contexts/AuthContext');
@@ -17,16 +15,20 @@ jest.mock('../contexts/RecordsContext');
 jest.mock('../contexts/QueueContext');
 jest.mock('../services/auth/tokenStorage');
 jest.mock('../components/BottomNavigation', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const React = require('react');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { TouchableOpacity, Text } = require('react-native');
-  return (props: any) => (
+  const MockBottomNavigation = () => (
     <TouchableOpacity testID="collection-tab" onPress={() => {
       // Mock the navigation behavior
-      (global as any).mockNavigate('Collection', { username: 'testuser' });
+      (global as any).mockNavigate('Collection', { username: 'testuser' }); // eslint-disable-line @typescript-eslint/no-explicit-any
     }}>
       <Text>Collection</Text>
     </TouchableOpacity>
   );
+  MockBottomNavigation.displayName = 'MockBottomNavigation';
+  return MockBottomNavigation;
 });
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
@@ -42,7 +44,6 @@ jest.mock('../utils/deviceUtils', () => ({
 const mockUseAuthContext = useAuthContext as jest.MockedFunction<typeof useAuthContext>;
 const mockUseRecordsContext = useRecordsContext as jest.MockedFunction<typeof useRecordsContext>;
 const mockUseQueueContext = useQueueContext as jest.MockedFunction<typeof useQueueContext>;
-const mockClearDiscogsToken = clearDiscogsToken as jest.MockedFunction<typeof clearDiscogsToken>;
 
 describe('LandingPage', () => {
   const mockRefreshAuth = jest.fn();

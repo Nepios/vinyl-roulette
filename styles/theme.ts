@@ -40,8 +40,8 @@ export const colors = {
   // Text variations
   text: {
     primary: '#f4f1eb',        // Main text color
-    secondary: '#666',         // Secondary gray text
-    tertiary: '#333',          // Darker gray for contrast
+    secondary: '#1d1d1f',         // Secondary gray text
+    tertiary: '#111112',          // Darker gray for contrast
     muted: '#999',             // Light gray for placeholders
     inverse: '#ffffff',        // White text for dark backgrounds
     disabled: 'rgba(244, 241, 235, 0.5)', // Disabled text state
@@ -68,9 +68,9 @@ export const colors = {
   // Shadow colors
   shadow: {
     default: '#000',           // Standard shadow color
-    light: '0.1', // Light shadow opacity
-    medium: '0.25', // Medium shadow opacity
-    heavy: '0.5',   // Heavy shadow opacity
+    light: 0.1, // Light shadow opacity
+    medium: 0.25, // Medium shadow opacity
+    heavy: 0.5,   // Heavy shadow opacity
   },
 
   // Navigation specific colors

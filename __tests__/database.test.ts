@@ -1,9 +1,12 @@
 // Mock SQLite before importing to avoid initialization issues
+const mockErrorCallback = jest.fn();
+const mockSuccessCallback = jest.fn();
+
 jest.mock('react-native-sqlite-2', () => ({
   openDatabase: jest.fn(() => ({
     transaction: jest.fn((txCallback, errorCallback, successCallback) => {
       const tx = {
-        executeSql: jest.fn((sql, params, successCb, errorCb) => {
+        executeSql: jest.fn((sql, params, successCb, _errorCb) => {
           // Mock successful SQL execution
           if (successCb) {
             successCb(null, { rows: { length: 1, item: () => ({}) } });
@@ -26,7 +29,13 @@ jest.mock('react-native-sqlite-2', () => ({
 }));
 
 describe('database', () => {
-  let dbModule: any;
+  let dbModule: {
+    initDatabase: () => Promise<void>;
+    getDB: () => { transaction: (callback: Function) => void };
+    safeInitDatabase: (retries?: number, delay?: number) => Promise<void>;
+    isDatabaseReady: () => Promise<boolean>;
+    testDatabase: () => Promise<void>;
+  };
   
   beforeAll(() => {
     // Import after mocking

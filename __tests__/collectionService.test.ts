@@ -196,7 +196,7 @@ describe('collectionService', () => {
     ];
 
     it('should retrieve all records ordered by title', async () => {
-      mockTransaction.mockImplementation((callback, errorCallback) => {
+      mockTransaction.mockImplementation((callback, _errorCallback) => {
         const mockTx = { executeSql: mockExecuteSql };
         
         mockExecuteSql.mockImplementation((sql, params, successCallback) => {
@@ -253,10 +253,10 @@ describe('collectionService', () => {
     });
 
     it('should handle SQL execution errors', async () => {
-      mockTransaction.mockImplementation((callback, errorCallback) => {
+      mockTransaction.mockImplementation((callback, _errorCallback) => {
         const mockTx = { executeSql: mockExecuteSql };
         
-        mockExecuteSql.mockImplementation((sql, params, successCallback) => {
+        mockExecuteSql.mockImplementation((_sql, _params, _successCallback) => {
           // This simulates an error in SQL execution that would bubble up
           throw new Error('SQL error');
         });

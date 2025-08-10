@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback } from 'react'
 import {
   View,
   Text,
@@ -49,7 +49,7 @@ const UserCollection = () => {
     return (
       <View style={styles.item}>
         <Text style={styles.title}>
-          {item.title} ({item.year})
+          {item.title} ({item.year === 0 ? 'Unknown' : item.year})
         </Text>
         <Text style={styles.artist}>{artists}</Text>
         {item.cover_image && (

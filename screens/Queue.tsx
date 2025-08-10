@@ -5,7 +5,7 @@ import BottomNavigation from '../components/BottomNavigation'
 import { hasDynamicIsland } from '../utils/deviceUtils'
 import { useQueueContext } from '../contexts/QueueContext'
 import { QueueItem } from '../database/queueService'
-import { colors, spacing, borderRadius, shadows, typography } from '../styles/theme'
+import { colors, spacing, borderRadius, typography } from '../styles/theme'
 
 const Queue = () => {
   // Dynamic Island detection and spacing

@@ -15,7 +15,7 @@ export const migrateThumbnailToThumb = (): Promise<void> => {
         tx.executeSql(
           "PRAGMA table_info(records)",
           [],
-          (_, result) => {
+          (_tx, result) => {
             const columns = [];
             for (let i = 0; i < result.rows.length; i++) {
               columns.push(result.rows.item(i).name);
@@ -50,7 +50,7 @@ export const migrateThumbnailToThumb = (): Promise<void> => {
               console.log('✅ Database schema is up to date');
             }
           },
-          (_, error) => {
+          (_tx, error) => {
             reject(new Error(`Failed to check table schema: ${error.message}`));
             return false;
           }
@@ -79,7 +79,7 @@ export const createQueueTableMigration = (): Promise<void> => {
         tx.executeSql(
           "SELECT name FROM sqlite_master WHERE type='table' AND name='queue'",
           [],
-          (_, result) => {
+          (_tx, result) => {
             if (result.rows.length === 0) {
               // Queue table doesn't exist, create it
               tx.executeSql(
@@ -97,7 +97,7 @@ export const createQueueTableMigration = (): Promise<void> => {
               console.log('✅ Queue table already exists');
             }
           },
-          (_, error) => {
+          (_tx, error) => {
             reject(new Error(`Failed to check queue table existence: ${error.message}`));
             return false;
           }
