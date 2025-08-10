@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react'
+import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
@@ -8,12 +8,15 @@ import { clearDiscogsToken } from '../services/auth/tokenStorage';
 import { useRecordsContext } from '../contexts/RecordsContext'
 import BottomNavigation from '../components/BottomNavigation';
 const turntableImage = require('../assets/images/record-player.png');
+const recordImage = require('../assets/images/vinyl-record.png'); // Add this image file
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { isAuthorized, refreshAuth, username } = useAuthContext();
   const { records, loading, error, refreshCollection, clearError, currentRandomRecord, getRandomRecord } = useRecordsContext();
   const [showTooltip, setShowTooltip] = useState(true);
+  const rotationAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (isAuthorized === false) {
@@ -46,7 +49,34 @@ const LandingPage = () => {
       return;
     }
     
-    getRandomRecord();
+    // Animate rotation and scale
+    Animated.parallel([
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.95,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ])
+    ]).start(() => {
+      // Reset rotation for next animation
+      rotationAnim.setValue(0);
+    });
+    
+    // Delay the record selection slightly for visual effect
+    setTimeout(() => {
+      getRandomRecord();
+    }, 200);
   };
 
   const handleRefreshCollection = async () => {
@@ -61,6 +91,19 @@ const LandingPage = () => {
     } catch (refreshError) {
       Alert.alert('Error', 'Failed to refresh collection.');
     }
+  };
+
+  // Animated style for turntable
+  const animatedStyle = {
+    transform: [
+      {
+        rotate: rotationAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '720deg'], // 2 full rotations (360deg × 2)
+        }),
+      },
+      { scale: scaleAnim }
+    ],
   };
 
   // Memoized parsed artists to avoid repeated JSON parsing
@@ -89,7 +132,13 @@ const LandingPage = () => {
           onPress={handleRandomRecord}
           disabled={records.length === 0 || loading}
         >
-          <Image source={turntableImage} style={styles.turntableImage} />
+          <View style={styles.turntableWrapper}>
+            <Image source={turntableImage} style={styles.turntableImage} />
+            <Animated.Image 
+              source={recordImage} 
+              style={[styles.recordImage, animatedStyle]} 
+            />
+          </View>
         </TouchableOpacity>
         {showTooltip && (
           <View style={styles.tooltip}>
@@ -260,9 +309,25 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
   },
+  turntableWrapper: {
+    width: '100%',
+    height: 200,
+    position: 'relative',
+  },
   turntableImage: {
     width: '100%',
     height: 200,
+    resizeMode: 'contain',
+    position: 'absolute',
+  },
+  recordImage: {
+    width:  300, // Adjust size to match the record on the turntable
+    height: 300,
+    position: 'absolute',
+    top: '50%',
+    left: '41.4%',
+    marginTop: -150, // Half of height to center
+    marginLeft: -150, // Half of width to center
     resizeMode: 'contain',
   },
   tooltip: {
