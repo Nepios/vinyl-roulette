@@ -73,5 +73,32 @@ jest.mock('@react-navigation/native-stack', () => ({
   }),
 }));
 
+// Mock react-native-gesture-handler
+jest.mock('react-native-gesture-handler', () => ({
+  GestureHandlerRootView: ({ children }) => children,
+  PanGestureHandler: ({ children }) => children,
+  State: {
+    BEGAN: 'BEGAN',
+    ACTIVE: 'ACTIVE',
+    END: 'END',
+    CANCELLED: 'CANCELLED',
+    FAILED: 'FAILED',
+    UNDETERMINED: 'UNDETERMINED',
+  },
+  Directions: {
+    RIGHT: 1,
+    LEFT: 2,
+    UP: 4,
+    DOWN: 8,
+  },
+}));
+
+// Mock react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => ({
+  SafeAreaProvider: ({ children }) => children,
+  SafeAreaView: ({ children }) => children,
+  useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+}));
+
 // Global test setup
 global.__DEV__ = true;

@@ -3,13 +3,16 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import DiscogsLoginScreen from './screens/DiscogsLoginScreen';
 import UserCollection from './screens/UserCollection';
 import LandingPage from './screens/LandingPage';
 import Queue from './screens/Queue';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext';
+import { QueueProvider } from './contexts/QueueContext';
 import { getDynamicIslandTopPadding } from './utils/deviceUtils';
+import { colors } from './styles/theme';
 
 export type RootStackParamList = {
   Home: { transitionDirection?: 'slide_from_left' | 'slide_from_right' } | undefined;
@@ -43,7 +46,7 @@ const AppNavigator = () => {
   if (authLoading) {
     return (
       <View style={styles.loadingContainer} testID="loading-container">
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={colors.status.loading} />
       </View>
     );
   }
@@ -66,9 +69,9 @@ const AppNavigator = () => {
             title: 'Vinyl Roulette',
             headerShown: true,
             headerStyle: {
-              backgroundColor: '#2d5a4a',
+              backgroundColor: colors.navigation.headerBackground,
             },
-            headerTintColor: '#f4f1eb',
+            headerTintColor: colors.navigation.headerText,
             headerTitleStyle: {
               fontWeight: '600',
               paddingTop: getDynamicIslandTopPadding(),
@@ -114,13 +117,17 @@ const AppNavigator = () => {
 
 const App = () => {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <RecordsProvider>
-          <AppNavigator />
-        </RecordsProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <RecordsProvider>
+            <QueueProvider>
+              <AppNavigator />
+            </QueueProvider>
+          </RecordsProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 
@@ -129,7 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.white,
   },
 });
 

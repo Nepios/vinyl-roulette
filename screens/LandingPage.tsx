@@ -1,24 +1,29 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { View, Text, Button, StyleSheet, Alert, Image, ActivityIndicator, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { useAuthContext } from '../contexts/AuthContext';
 import { clearDiscogsToken } from '../services/auth/tokenStorage';
-import { useRecordsContext } from '../contexts/RecordsContext'
+import { useRecordsContext } from '../contexts/RecordsContext';
+import { useQueueContext } from '../contexts/QueueContext';
 import BottomNavigation from '../components/BottomNavigation';
 import { hasDynamicIsland, getTurntableMarginTop, getContentMarginTop } from '../utils/deviceUtils';
+import { colors, spacing, borderRadius, shadows, typography } from '../styles/theme';
 const turntableImage = require('../assets/images/record-player.png');
 const recordImage = require('../assets/images/vinyl-record.png'); 
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { isAuthorized, refreshAuth, username } = useAuthContext();
-  const { records, loading, error, refreshCollection, clearError, currentRandomRecord, getRandomRecord } = useRecordsContext();
+  const { records, loading, error, refreshCollection, clearError, currentRandomRecord, getRandomRecord, clearRandomRecord } = useRecordsContext();
+  const { addToQueue, queueCount, refreshQueue } = useQueueContext();
   const [showTooltip, setShowTooltip] = useState(true);
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
   
   // Get screen dimensions
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -35,6 +40,13 @@ const LandingPage = () => {
       navigation.navigate('Login');
     }
   }, [isAuthorized, navigation]);
+
+  // Refresh queue on component mount
+  useEffect(() => {
+    if (isAuthorized) {
+      refreshQueue();
+    }
+  }, [isAuthorized, refreshQueue]);
 
   // Hide tooltip after 3 seconds
   useEffect(() => {
@@ -105,6 +117,110 @@ const LandingPage = () => {
     }
   };
 
+  const handleAddToQueue = async (showAlert: boolean = true) => {
+    if (!currentRandomRecord) {
+      if (showAlert) Alert.alert('No Record', 'Please select a random record first.');
+      return false;
+    }
+
+    const success = await addToQueue(currentRandomRecord);
+    if (success) {
+      if (showAlert) {
+        Alert.alert('Added to Queue', `"${currentRandomRecord.title}" has been added to your queue!`);
+      }
+      
+      // Clear current record immediately, then get new one
+      clearRandomRecord();
+      setTimeout(() => {
+        getRandomRecord();
+      }, 200);
+      
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const handleRejectRecord = () => {
+    if (currentRandomRecord) {
+      
+      // Clear current record immediately, then get new one
+      clearRandomRecord();
+      setTimeout(() => {
+        getRandomRecord();
+      }, 300);
+    }
+  };
+
+  const onPanGestureEvent = Animated.event(
+    [{ nativeEvent: { translationX: translateX } }],
+    { useNativeDriver: true }
+  );
+
+  const onHandlerStateChange = async (event: any) => {
+    if (event.nativeEvent.state === State.END) {
+      const { translationX: tx } = event.nativeEvent;
+      
+      // If swiped right more than 100px, add to queue
+      if (tx > 100 && currentRandomRecord) {
+        // Save the record to add, but don't clear yet
+        const recordToAdd = currentRandomRecord;
+        
+        // Animate further right to indicate success
+        Animated.timing(translateX, {
+          toValue: screenWidth,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(async () => {
+          // Clear the record after animation completes
+          clearRandomRecord();
+          // Reset position instantly (off-screen)
+          translateX.setValue(0);
+          // Add to queue without alert (silent)
+          const success = await addToQueue(recordToAdd);
+          if (success) {
+            // Get new record after successful add
+            setTimeout(() => {
+              getRandomRecord();
+            }, 100);
+          } else {
+            // If add failed, still get a new record
+            setTimeout(() => {
+              getRandomRecord();
+            }, 100);
+          }
+        });
+      } 
+      // If swiped left more than 100px, reject record
+      else if (tx < -100 && currentRandomRecord) {
+        // Animate further left to indicate rejection
+        Animated.timing(translateX, {
+          toValue: -screenWidth,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          // Clear the record after animation completes
+          clearRandomRecord();
+          // Reset position instantly (off-screen)
+          translateX.setValue(0);
+          // Get new record after rejection
+          setTimeout(() => {
+            getRandomRecord();
+          }, 100);
+        });
+      } 
+      // If swipe wasn't far enough, reset position
+      else {
+        Animated.spring(translateX, {
+          toValue: 0,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }).start();
+      }
+    }
+  };
+
   // Animated style for turntable
   const animatedStyle = {
     transform: [
@@ -118,6 +234,16 @@ const LandingPage = () => {
     ],
   };
 
+  // Animated style for record card with color feedback
+  const recordCardAnimatedStyle = {
+    transform: [{ translateX }],
+    backgroundColor: translateX.interpolate({
+      inputRange: [-100, 0, 100],
+      outputRange: [colors.gesture.reject, colors.gesture.neutral, colors.gesture.accept],
+      extrapolate: 'clamp',
+    }),
+  };
+
   // Memoized parsed artists to avoid repeated JSON parsing
   const displayArtists = useMemo(() => {
     if (!currentRandomRecord?.artists) return '';
@@ -129,13 +255,13 @@ const LandingPage = () => {
   }, [currentRandomRecord?.artists]);
 
   // Dynamic positioning based on screen width
-  const getRecordImageStyle = (screenWidth: number) => {
+  const getRecordImageStyle = (width: number) => {
     // Calculate left position as a ratio of screen width
     // Adjust these values based on your turntable image proportions
-    const leftPercentage = screenWidth < 375 ? 0.39 : screenWidth < 414 ? 0.415 : 0.425;
+    const leftPercentage = width < 375 ? 0.39 : width < 414 ? 0.415 : 0.425;
     
     return {
-      left: screenWidth * leftPercentage - 150, // Subtract half width to center
+      left: width * leftPercentage - 150, // Subtract half width to center
     };
   };
 
@@ -162,7 +288,7 @@ const LandingPage = () => {
   if (loading && records.length === 0) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={colors.status.loading} />
         <Text style={styles.loadingText}>Loading your collection...</Text>
       </SafeAreaView>
     );
@@ -205,32 +331,43 @@ const LandingPage = () => {
         )}
 
         {currentRandomRecord && (
-          <View style={[styles.recordContainer, getRecordContainerStyle()]}>
-            <Text style={styles.recordTitle} numberOfLines={3} ellipsizeMode="tail">
-              {currentRandomRecord.title} 
-            </Text>
-            <Text style={styles.artist} >
-              {displayArtists}
-            </Text>
-            <View style={styles.imageContainer}>
-              {currentRandomRecord.cover_image ? (
-                <Image 
-                  source={{ uri: currentRandomRecord.cover_image }} 
-                  style={styles.coverImage}
-                  onError={() => console.log('Failed to load cover image')}
-                />
-              ) : (
-                <View style={styles.placeholderImage}>
-                  <Text style={styles.placeholderText}>No Image</Text>
-                </View>
-              )}
-            </View>
+          <PanGestureHandler
+            onGestureEvent={onPanGestureEvent}
+            onHandlerStateChange={onHandlerStateChange}
+          >
+            <Animated.View style={[
+              styles.recordContainer, 
+              getRecordContainerStyle(),
+              recordCardAnimatedStyle
+            ]}>
+              <Text style={styles.recordTitle} numberOfLines={3} ellipsizeMode="tail">
+                {currentRandomRecord.title} 
+              </Text>
+              <Text style={styles.artist} >
+                {displayArtists}
+              </Text>
+              <View style={styles.imageContainer}>
+                {currentRandomRecord.cover_image ? (
+                  <Image 
+                    source={{ uri: currentRandomRecord.cover_image }} 
+                    style={styles.coverImage}
+                  />
+                ) : (
+                  <View style={styles.placeholderImage}>
+                    <Text style={styles.placeholderText}>No Image</Text>
+                  </View>
+                )}
+              </View>
 
-            <Text style={styles.year}>
-              {currentRandomRecord.year}
-            </Text>
-
-          </View>
+              <Text style={styles.year}>
+                {currentRandomRecord.year}
+              </Text>
+              
+              <Text style={styles.swipeHint}>
+                ← Swipe left to skip | Swipe right to queue →
+              </Text>
+            </Animated.View>
+          </PanGestureHandler>
         )}
       </View>
       {/* <View style={styles.buttonContainer}>
@@ -244,46 +381,46 @@ const LandingPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2d5a4a',
+    backgroundColor: colors.background.primary,
   },
   content: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 24,
+    padding: spacing.base,
+    paddingTop: spacing.lg,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2d5a4a',
+    backgroundColor: colors.background.primary,
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#666',
+    marginTop: spacing.base,
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
   },
   errorContainer: {
-    backgroundColor: '#2d5a4a',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: colors.status.errorBackground,
+    padding: spacing.base,
+    borderRadius: borderRadius.base,
+    marginBottom: spacing.base,
     alignItems: 'center',
   },
   errorText: {
-    color: '#c62828',
+    color: colors.status.error,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.sm,
   },
   statsContainer: {
     marginBottom: 20,
     alignItems: 'center',
   },
   statsText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.tertiary,
   },
   buttonContainer: {
     marginBottom: 20,
@@ -291,30 +428,27 @@ const styles = StyleSheet.create({
   },
   recordContainer: {
     marginTop: 0,
-    padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
+    padding: spacing.base,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...shadows.base,
     width: '100%',
     justifyContent: 'space-around',
     overflow: 'hidden',
   },
   recordTitle: {
-    fontWeight: 'bold',
-    fontSize: 18,
+    fontWeight: typography.fontWeight.bold,
+    fontSize: typography.fontSize.xl,
     textAlign: 'center',
     width: '100%',
     flexShrink: 1,
+    color: colors.text.primary,
   },
   artist: {
-    marginTop: 8,
-    fontSize: 14,
-    color: '#f4f1eb',
+    marginTop: spacing.sm,
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     textAlign: 'center',
     width: '100%',
   },
@@ -322,45 +456,53 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: 150,
     height: 150,
-    borderRadius: 8,
+    borderRadius: borderRadius.base,
     alignSelf: 'center',
   },
   coverImage: {
     width: 150,
     height: 150,
-    borderRadius: 8,
+    borderRadius: borderRadius.base,
     justifyContent: 'center',
     alignItems: 'center',
   },
   placeholderImage: {
     width: 150,
     height: 150,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    borderRadius: borderRadius.base,
+    backgroundColor: colors.background.placeholder,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border.primary,
     borderStyle: 'dashed',
   },
   placeholderText: {
-    color: '#999',
-    fontSize: 14,
+    color: colors.text.muted,
+    fontSize: typography.fontSize.base,
     textAlign: 'center',
   },
   year: {
-    fontSize: 14,
-    color: '#f4f1eb',
+    fontSize: typography.fontSize.base,
+    color: colors.text.primary,
     textAlign: 'center',
     width: '100%',
     marginTop: 10,
+  },
+  swipeHint: {
+    fontSize: typography.fontSize.sm,
+    color: colors.secondary.muted,
+    textAlign: 'center',
+    width: '100%',
+    marginTop: spacing.sm,
+    fontStyle: 'italic',
   },
   turntableContainer: {
     position: 'relative',
     width: '100%',
   },
   dynamicIslandPadding: {
-    paddingTop: 8,
+    paddingTop: spacing.sm,
   },
   turntableWrapper: {
     width: '100%',
@@ -386,17 +528,17 @@ const styles = StyleSheet.create({
     top: '50%',
     left: '50%',
     transform: [{ translateX: -70 }, { translateY: -15 }],
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: colors.background.overlay,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: colors.border.muted,
   },
   tooltipText: {
-    color: '#f4f1eb',
-    fontSize: 12,
-    fontWeight: '500',
+    color: colors.text.primary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
   },
 });
 

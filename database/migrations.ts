@@ -1,4 +1,5 @@
 import { getDB } from './database';
+import { createQueueTable } from './schema';
 
 /**
  * Database migration to rename thumbnail column to thumb
@@ -66,11 +67,59 @@ export const migrateThumbnailToThumb = (): Promise<void> => {
 };
 
 /**
+ * Create queue table if it doesn't exist
+ */
+export const createQueueTableMigration = (): Promise<void> => {
+  const db = getDB();
+  
+  return new Promise((resolve, reject) => {
+    db.transaction(
+      (tx) => {
+        // Check if queue table exists
+        tx.executeSql(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='queue'",
+          [],
+          (_, result) => {
+            if (result.rows.length === 0) {
+              // Queue table doesn't exist, create it
+              tx.executeSql(
+                createQueueTable,
+                [],
+                () => {
+                  console.log('✅ Queue table created successfully');
+                },
+                (_, error) => {
+                  reject(new Error(`Failed to create queue table: ${error.message}`));
+                  return false;
+                }
+              );
+            } else {
+              console.log('✅ Queue table already exists');
+            }
+          },
+          (_, error) => {
+            reject(new Error(`Failed to check queue table existence: ${error.message}`));
+            return false;
+          }
+        );
+      },
+      (error) => {
+        reject(new Error(`Queue table migration transaction failed: ${error.message}`));
+      },
+      () => {
+        resolve();
+      }
+    );
+  });
+};
+
+/**
  * Run all pending migrations
  */
 export const runMigrations = async (): Promise<void> => {
   try {
     await migrateThumbnailToThumb();
+    await createQueueTableMigration();
     console.log('✅ All database migrations completed successfully');
   } catch (error) {
     console.error('❌ Database migration failed:', error);

@@ -125,9 +125,15 @@ describe('database', () => {
       expect(schema.createMetadataTable.includes('value')).toBe(true);
       expect(schema.createMetadataTable.includes('PRIMARY KEY')).toBe(true);
       
+      // Check queue table structure
+      expect(schema.createQueueTable.includes('record_id')).toBe(true);
+      expect(schema.createQueueTable.includes('play_order')).toBe(true);
+      expect(schema.createQueueTable.includes('FOREIGN KEY')).toBe(true);
+      expect(schema.createQueueTable.includes('REFERENCES records')).toBe(true);
+      
       // Check createTables array
       expect(Array.isArray(schema.createTables)).toBe(true);
-      expect(schema.createTables.length).toBe(2);
+      expect(schema.createTables.length).toBe(3);
     });
   });
 });

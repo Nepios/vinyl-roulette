@@ -4,6 +4,7 @@ import { useRoute } from '@react-navigation/native'
 import { useAuthContext } from '../contexts/AuthContext'
 import { useNavigationDirection } from '../hooks/useNavigationDirection'
 import { House, Disc, Turntable } from 'lucide-react-native'
+import { colors, spacing, borderRadius, typography } from '../styles/theme'
 
 const BottomNavigation = () => {
   const { username, isAuthorized } = useAuthContext()
@@ -49,8 +50,8 @@ const BottomNavigation = () => {
   }
 
   const getIconColor = (screenName: string, disabled = false) => {
-    if (disabled) return 'rgba(244, 241, 235, 0.5)'
-    return isActive(screenName) ? '#ffffff' : '#f4f1eb'
+    if (disabled) return colors.text.disabled
+    return isActive(screenName) ? colors.navigation.activeTab : colors.navigation.inactiveTab
   }
 
   const getIcon = (screenName: string) => {
@@ -108,12 +109,12 @@ const BottomNavigation = () => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(45, 90, 74, 0.95)',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    backgroundColor: `${colors.background.primary}f2`, // Adding alpha for 95% opacity
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: '#000',
+    borderTopColor: colors.border.muted,
+    shadowColor: colors.shadow.default,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -122,12 +123,12 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
     paddingHorizontal: 4,
-    borderRadius: 8,
+    borderRadius: borderRadius.base,
   },
   activeTab: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.background.card,
   },
   icon: {
     marginBottom: 4,
@@ -141,13 +142,13 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    fontSize: 12,
-    color: '#f4f1eb',
-    fontWeight: '500',
+    fontSize: typography.fontSize.sm,
+    color: colors.navigation.inactiveTab,
+    fontWeight: typography.fontWeight.medium,
   },
   activeLabel: {
-    color: '#ffffff',
-    fontWeight: '600',
+    color: colors.navigation.activeTab,
+    fontWeight: typography.fontWeight.semibold,
   },
   disabledLabel: {
     opacity: 0.5,
