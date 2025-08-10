@@ -8,12 +8,14 @@ import {
   Button,
   RefreshControl,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { RootStackParamList } from '../App'
 import { Image } from 'react-native'
 import { useRecordsContext } from '../contexts/RecordsContext'
 import { Record } from '../types/Record'
 import BottomNavigation from '../components/BottomNavigation'
+import { hasDynamicIsland } from '../utils/deviceUtils'
 
 type CollectionScreenRouteProp = RouteProp<RootStackParamList, 'Collection'>
 
@@ -21,6 +23,9 @@ const UserCollection = () => {
   const { records, loading, error, refreshCollection, clearError } = useRecordsContext()
   const route = useRoute<CollectionScreenRouteProp>()
   const username = route.params?.username
+  
+  // Dynamic Island detection and spacing
+  const isDynamicIsland = hasDynamicIsland()
 
   const handleRefresh = useCallback(async () => {
     if (!username) return
@@ -121,10 +126,15 @@ const UserCollection = () => {
   }
 
   return (
-    <View style={styles.container}>
-      {renderContent()}
+    <SafeAreaView style={styles.container}>
+      <View style={[
+        styles.content,
+        isDynamicIsland && styles.dynamicIslandPadding
+      ]}>
+        {renderContent()}
+      </View>
       <BottomNavigation />
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -132,6 +142,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2d5a4a',
+  },
+  content: {
+    flex: 1,
+  },
+  dynamicIslandPadding: {
+    paddingTop: 8,
   },
   loadingContainer: {
     flex: 1,

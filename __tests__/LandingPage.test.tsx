@@ -31,6 +31,11 @@ jest.mock('@react-navigation/native', () => ({
     navigate: mockNavigate,
   }),
 }));
+jest.mock('../utils/deviceUtils', () => ({
+  hasDynamicIsland: () => false,
+  getTurntableMarginTop: () => 20,
+  getContentMarginTop: () => 20,
+}));
 
 const mockUseAuthContext = useAuthContext as jest.MockedFunction<typeof useAuthContext>;
 const mockUseRecordsContext = useRecordsContext as jest.MockedFunction<typeof useRecordsContext>;
@@ -72,15 +77,13 @@ describe('LandingPage', () => {
       });
     });
 
-    it('should render random record and refresh collection buttons', () => {
+    it('should render turntable with touchable area for random record', () => {
       let component;
       ReactTestRenderer.act(() => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
-      const randomButton = component!.root.findByProps({ title: 'Random Record' });
-      const refreshButton = component!.root.findByProps({ title: 'Refresh Collection' });
-      expect(randomButton).toBeTruthy();
-      expect(refreshButton).toBeTruthy();
+      const turntableButton = component!.root.findByProps({ testID: 'turntable-button' });
+      expect(turntableButton).toBeTruthy();
     });
 
     it('should render bottom navigation', () => {
@@ -89,9 +92,9 @@ describe('LandingPage', () => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
       const bottomNav = component!.root.findByProps({ testID: 'collection-tab' });
-      const clearTokensButton = component!.root.findByProps({ title: 'Clear Tokens' });
       expect(bottomNav).toBeTruthy();
-      expect(clearTokensButton).toBeTruthy();
+      // Clear tokens button is commented out in the current implementation
+      // so we don't test for it
     });
 
     it('should navigate to Collection when bottom navigation Collection tab is pressed', () => {
@@ -134,15 +137,13 @@ describe('LandingPage', () => {
         component = ReactTestRenderer.create(<LandingPage />);
       });
       
-      const randomButton = component!.root.findByProps({ title: 'Random Record' });
-      const refreshButton = component!.root.findByProps({ title: 'Refresh Collection' });
-      const clearTokensButton = component!.root.findByProps({ title: 'Clear Tokens' });
+      const turntableButton = component!.root.findByProps({ testID: 'turntable-button' });
       const bottomNav = component!.root.findByProps({ testID: 'collection-tab' });
       
-      expect(randomButton).toBeTruthy();
-      expect(refreshButton).toBeTruthy();
-      expect(clearTokensButton).toBeTruthy();
+      expect(turntableButton).toBeTruthy();
       expect(bottomNav).toBeTruthy();
+      // Clear tokens button is commented out in the current implementation
+      // Refresh collection button only appears in error state
     });
   });
 

@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import DiscogsLoginScreen from './screens/DiscogsLoginScreen';
 import UserCollection from './screens/UserCollection';
 import LandingPage from './screens/LandingPage';
 import Queue from './screens/Queue';
 import { AuthProvider, useAuthContext } from './contexts/AuthContext';
 import { RecordsProvider, useRecordsContext } from './contexts/RecordsContext';
+import { getDynamicIslandTopPadding } from './utils/deviceUtils';
 
 export type RootStackParamList = {
   Home: { transitionDirection?: 'slide_from_left' | 'slide_from_right' } | undefined;
@@ -69,6 +71,7 @@ const AppNavigator = () => {
             headerTintColor: '#f4f1eb',
             headerTitleStyle: {
               fontWeight: '600',
+              paddingTop: getDynamicIslandTopPadding(),
             },
             animation:
               route.params?.transitionDirection === 'slide_from_left'
@@ -111,11 +114,13 @@ const AppNavigator = () => {
 
 const App = () => {
   return (
-    <AuthProvider>
-      <RecordsProvider>
-        <AppNavigator />
-      </RecordsProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <RecordsProvider>
+          <AppNavigator />
+        </RecordsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 };
 

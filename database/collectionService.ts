@@ -1,19 +1,19 @@
 import { getDB } from './database';
 import { CollectionRelease } from '../services/discogsApi';
-import { Record } from '../screens/UserCollection';
+import { Record } from '../types/Record';
 
 export const saveRecords = async (records: CollectionRelease[]) => {
   const db = getDB();
   db.transaction((tx) => {
     for (const rec of records) {
       tx.executeSql(       
-        `INSERT INTO records (discogs_id, title, artists, year, thumbnail, resource_url, date_added, genres, styles, cover_image)
+        `INSERT INTO records (discogs_id, title, artists, year, thumb, resource_url, date_added, genres, styles, cover_image)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(discogs_id) DO UPDATE SET
            title=excluded.title,
            artists=excluded.artists,
            year=excluded.year,
-           thumbnail=excluded.thumbnail,
+           thumb=excluded.thumb,
            resource_url=excluded.resource_url,
            date_added=excluded.date_added,
            genres=excluded.genres,

@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS records (
   title TEXT,
   artists TEXT,
   year INTEGER,
-  thumbnail TEXT,
+  thumb TEXT,
   resource_url TEXT,
   cover_image TEXT,
   genres TEXT,
