@@ -398,6 +398,7 @@ const LandingPage = () => {
           onPress={handleRandomRecord}
           disabled={records.length === 0 || loading}
           testID="turntable-button"
+          activeOpacity={1}
         >
           <View style={styles.turntableWrapper}>
             <Image source={turntableImage} style={styles.turntableImage} />
@@ -529,7 +530,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-around',
     overflow: 'hidden',
-    minHeight: 300,
+    minHeight: spacing.xl * 3, // Ensure enough height for content
   },
   recordTitle: {
     fontWeight: typography.fontWeight.bold,
