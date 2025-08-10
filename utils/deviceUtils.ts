@@ -126,7 +126,7 @@ export const getTurntableMarginTop = (): number => {
     case ScreenSize.SMALL:
       return 0; // Remove margin on small screens for more space
     case ScreenSize.MEDIUM:
-      return 5; // Reduced margin for medium screens
+      return 0; // Reduced margin for medium screens
     case ScreenSize.LARGE:
       return 10; // Standard margin for large screens
     default:
@@ -144,7 +144,7 @@ export const getContentMarginTop = (): number => {
     case ScreenSize.SMALL:
       return 0; // Remove margin on small screens for more space
     case ScreenSize.MEDIUM:
-      return 5; // Standard margin for medium screens
+      return 0; // Standard margin for medium screens
     case ScreenSize.LARGE:
       return 5; // Standard margin for large screens
     default:

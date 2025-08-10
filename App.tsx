@@ -117,7 +117,7 @@ const AppNavigator = () => {
 
 const App = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.rootContainer}>
       <SafeAreaProvider>
         <AuthProvider>
           <RecordsProvider>
@@ -132,6 +132,9 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

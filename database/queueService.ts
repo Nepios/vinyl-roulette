@@ -29,7 +29,7 @@ export const addToQueue = async (record: Record): Promise<void> => {
         tx.executeSql(
           'SELECT COALESCE(MAX(play_order), 0) + 1 as next_order FROM queue',
           [],
-          (_, result) => {
+          (_tx, result) => {
             const nextOrder = result.rows.item(0).next_order;
             
             // Insert the record into queue

@@ -12,9 +12,9 @@ interface DiscogsTokens {
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
-  const [showLogin, setShowLogin] = useState(false);
+  const [_showLogin, _setShowLogin] = useState(false);
   const [tokens, setTokens] = useState<DiscogsTokens | null>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<{ username: string } | null>(null);
 
   const testAsyncStorage = async () => {
     try {

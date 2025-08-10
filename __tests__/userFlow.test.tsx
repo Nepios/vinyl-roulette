@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
-import { NavigationContainer } from '@react-navigation/native';
 import App from '../App';
 import { useAuthContext } from '../contexts/AuthContext';
 

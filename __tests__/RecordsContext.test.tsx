@@ -46,7 +46,7 @@ function renderHook<TResult>(
   callback: () => TResult,
   options?: { wrapper?: React.ComponentType<{ children: React.ReactNode }> }
 ) {
-  let result: { current: TResult; error?: Error } = { current: undefined as any };
+  const result: { current: TResult; error?: Error } = { current: undefined as any };
   let renderer: ReactTestRenderer.ReactTestRenderer;
   
   function TestComponent() {

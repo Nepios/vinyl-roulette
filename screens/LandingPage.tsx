@@ -6,20 +6,21 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import { useAuthContext } from '../contexts/AuthContext';
-import { clearDiscogsToken } from '../services/auth/tokenStorage';
 import { useRecordsContext } from '../contexts/RecordsContext';
 import { useQueueContext } from '../contexts/QueueContext';
 import BottomNavigation from '../components/BottomNavigation';
 import { hasDynamicIsland, getTurntableMarginTop, getContentMarginTop } from '../utils/deviceUtils';
 import { colors, spacing, borderRadius, shadows, typography } from '../styles/theme';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const turntableImage = require('../assets/images/record-player.png');
-const recordImage = require('../assets/images/vinyl-record.png'); 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const recordImage = require('../assets/images/vinyl-record.png');
 
 const LandingPage = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { isAuthorized, refreshAuth, username } = useAuthContext();
+  const { isAuthorized, username } = useAuthContext();
   const { records, loading, error, refreshCollection, clearError, currentRandomRecord, getRandomRecord, clearRandomRecord } = useRecordsContext();
-  const { addToQueue, queueCount, refreshQueue } = useQueueContext();
+  const { addToQueue, refreshQueue } = useQueueContext();
   const [showTooltip, setShowTooltip] = useState(true);
   const rotationAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -57,15 +58,15 @@ const LandingPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleClearTokens = async () => {
-    try {
-      await clearDiscogsToken();
-      refreshAuth();
-      Alert.alert('Tokens cleared', 'Please reauthorize with Discogs.');
-    } catch (authError) {
-      Alert.alert('Error', 'Failed to clear tokens.');
-    }
-  };
+  // const handleClearTokens = async () => {
+  //   try {
+  //     await clearDiscogsToken();
+  //     refreshAuth();
+  //     Alert.alert('Tokens cleared', 'Please reauthorize with Discogs.');
+  //   } catch (authError) {
+  //     Alert.alert('Error', 'Failed to clear tokens.');
+  //   }
+  // };
 
   const handleRandomRecord = () => {
     if (records.length === 0) {
@@ -117,47 +118,47 @@ const LandingPage = () => {
     }
   };
 
-  const handleAddToQueue = async (showAlert: boolean = true) => {
-    if (!currentRandomRecord) {
-      if (showAlert) Alert.alert('No Record', 'Please select a random record first.');
-      return false;
-    }
+  // const handleAddToQueue = async (showAlert: boolean = true) => {
+  //   if (!currentRandomRecord) {
+  //     if (showAlert) Alert.alert('No Record', 'Please select a random record first.');
+  //     return false;
+  //   }
 
-    const success = await addToQueue(currentRandomRecord);
-    if (success) {
-      if (showAlert) {
-        Alert.alert('Added to Queue', `"${currentRandomRecord.title}" has been added to your queue!`);
-      }
+  //   const success = await addToQueue(currentRandomRecord);
+  //   if (success) {
+  //     if (showAlert) {
+  //       Alert.alert('Added to Queue', `"${currentRandomRecord.title}" has been added to your queue!`);
+  //     }
       
-      // Clear current record immediately, then get new one
-      clearRandomRecord();
-      setTimeout(() => {
-        getRandomRecord();
-      }, 200);
+  //     // Clear current record immediately, then get new one
+  //     clearRandomRecord();
+  //     setTimeout(() => {
+  //       getRandomRecord();
+  //     }, 200);
       
-      return true;
-    } else {
-      return false;
-    }
-  };
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // };
 
-  const handleRejectRecord = () => {
-    if (currentRandomRecord) {
+  // const handleRejectRecord = () => {
+  //   if (currentRandomRecord) {
       
-      // Clear current record immediately, then get new one
-      clearRandomRecord();
-      setTimeout(() => {
-        getRandomRecord();
-      }, 300);
-    }
-  };
+  //     // Clear current record immediately, then get new one
+  //     clearRandomRecord();
+  //     setTimeout(() => {
+  //       getRandomRecord();
+  //     }, 300);
+  //   }
+  // };
 
   const onPanGestureEvent = Animated.event(
     [{ nativeEvent: { translationX: translateX } }],
     { useNativeDriver: true }
   );
 
-  const onHandlerStateChange = async (event: any) => {
+  const onHandlerStateChange = async (event: { nativeEvent: { state: number; translationX: number } }) => {
     if (event.nativeEvent.state === State.END) {
       const { translationX: tx } = event.nativeEvent;
       
@@ -166,16 +167,24 @@ const LandingPage = () => {
         // Save the record to add, but don't clear yet
         const recordToAdd = currentRandomRecord;
         
-        // Animate further right to indicate success
-        Animated.timing(translateX, {
-          toValue: screenWidth,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(async () => {
+        // Animate slide right and trigger turntable spin
+        Animated.parallel([
+          Animated.timing(translateX, {
+            toValue: screenWidth,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(rotationAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        ]).start(async () => {
           // Clear the record after animation completes
           clearRandomRecord();
-          // Reset position instantly (off-screen)
+          // Reset position and rotation instantly (off-screen)
           translateX.setValue(0);
+          rotationAnim.setValue(0);
           // Add to queue without alert (silent)
           const success = await addToQueue(recordToAdd);
           if (success) {
@@ -193,16 +202,24 @@ const LandingPage = () => {
       } 
       // If swiped left more than 100px, reject record
       else if (tx < -100 && currentRandomRecord) {
-        // Animate further left to indicate rejection
-        Animated.timing(translateX, {
-          toValue: -screenWidth,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => {
+        // Animate slide left and trigger turntable spin
+        Animated.parallel([
+          Animated.timing(translateX, {
+            toValue: -screenWidth,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(rotationAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        ]).start(() => {
           // Clear the record after animation completes
           clearRandomRecord();
-          // Reset position instantly (off-screen)
+          // Reset position and rotation instantly (off-screen)
           translateX.setValue(0);
+          rotationAnim.setValue(0);
           // Get new record after rejection
           setTimeout(() => {
             getRandomRecord();
@@ -285,6 +302,82 @@ const LandingPage = () => {
     };
   };
 
+  // Dynamic cover image size based on screen dimensions
+  const getCoverImageStyle = () => {
+    // For small screens (like iPhone SE), reduce image size to fit more content
+    if (screenHeight <= 667 || screenWidth <= 375) { // iPhone SE and similar
+      return {
+        width: 120,
+        height: 120,
+      };
+    }
+    
+    // For medium screens, use slightly smaller size
+    if (screenHeight <= 736) { // iPhone 8 Plus and similar
+      return {
+        width: 140,
+        height: 140,
+      };
+    }
+    
+    // Default size for larger screens
+    return {
+      width: 150,
+      height: 150,
+    };
+  };
+
+  // Get container style for cover image based on dynamic size
+  const getImageContainerStyle = () => {
+    const imageStyle = getCoverImageStyle();
+    // Reduce top margin on small screens to save space
+    const marginTop = screenHeight <= 667 ? 6 : 10;
+    
+    return {
+      marginTop,
+      width: imageStyle.width,
+      height: imageStyle.height,
+      borderRadius: borderRadius.base,
+      alignSelf: 'center' as const,
+    };
+  };
+
+  // Dynamic text styles for better fit on small screens
+  const getResponsiveTextStyles = () => {
+    if (screenHeight <= 667 || screenWidth <= 375) { // Small screens
+      return {
+        title: {
+          fontSize: typography.fontSize.lg, // Slightly smaller than xl
+          marginBottom: 4,
+        },
+        artist: {
+          fontSize: typography.fontSize.sm, // Smaller than base
+          marginTop: 4,
+        },
+        year: {
+          marginTop: 6,
+          fontSize: typography.fontSize.sm,
+        },
+      };
+    }
+    
+    // Default sizes for larger screens
+    return {
+      title: {
+        fontSize: typography.fontSize.xl,
+        marginBottom: 0,
+      },
+      artist: {
+        fontSize: typography.fontSize.base,
+        marginTop: spacing.sm,
+      },
+      year: {
+        marginTop: 10,
+        fontSize: typography.fontSize.base,
+      },
+    };
+  };
+
   if (loading && records.length === 0) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -340,27 +433,27 @@ const LandingPage = () => {
               getRecordContainerStyle(),
               recordCardAnimatedStyle
             ]}>
-              <Text style={styles.recordTitle} numberOfLines={3} ellipsizeMode="tail">
+              <Text style={[styles.recordTitle, getResponsiveTextStyles().title]} numberOfLines={3} ellipsizeMode="tail">
                 {currentRandomRecord.title} 
               </Text>
-              <Text style={styles.artist} >
+              <Text style={[styles.artist, getResponsiveTextStyles().artist]}>
                 {displayArtists}
               </Text>
-              <View style={styles.imageContainer}>
+              <View style={getImageContainerStyle()}>
                 {currentRandomRecord.cover_image ? (
                   <Image 
                     source={{ uri: currentRandomRecord.cover_image }} 
-                    style={styles.coverImage}
+                    style={[styles.coverImage, getCoverImageStyle()]}
                   />
                 ) : (
-                  <View style={styles.placeholderImage}>
+                  <View style={[styles.placeholderImage, getCoverImageStyle()]}>
                     <Text style={styles.placeholderText}>No Image</Text>
                   </View>
                 )}
               </View>
 
-              <Text style={styles.year}>
-                {currentRandomRecord.year}
+              <Text style={[styles.year, getResponsiveTextStyles().year]}>
+                {currentRandomRecord.year === 0 ? 'Unknown' : currentRandomRecord.year}
               </Text>
               
               <Text style={styles.swipeHint}>
@@ -436,6 +529,7 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-around',
     overflow: 'hidden',
+    minHeight: 300,
   },
   recordTitle: {
     fontWeight: typography.fontWeight.bold,
@@ -443,7 +537,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '100%',
     flexShrink: 1,
-    color: colors.text.primary,
+    color: colors.text.tertiary,
   },
   artist: {
     marginTop: spacing.sm,
@@ -453,22 +547,15 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   imageContainer: {
-    marginTop: 10,
-    width: 150,
-    height: 150,
-    borderRadius: borderRadius.base,
-    alignSelf: 'center',
+    // Dynamic dimensions handled by getImageContainerStyle()
   },
   coverImage: {
-    width: 150,
-    height: 150,
     borderRadius: borderRadius.base,
     justifyContent: 'center',
     alignItems: 'center',
+    // Dynamic dimensions handled by getCoverImageStyle()
   },
   placeholderImage: {
-    width: 150,
-    height: 150,
     borderRadius: borderRadius.base,
     backgroundColor: colors.background.placeholder,
     justifyContent: 'center',
@@ -476,6 +563,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.primary,
     borderStyle: 'dashed',
+    // Dynamic dimensions handled by getCoverImageStyle()
   },
   placeholderText: {
     color: colors.text.muted,
