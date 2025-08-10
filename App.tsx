@@ -54,6 +54,7 @@ const AppNavigator = () => {
           animation: 'slide_from_right', // Default animation
           customAnimationOnGesture: true,
           fullScreenGestureEnabled: true,
+          headerShown: false, // Hide the header completely
         })}
       >
         <Stack.Screen
@@ -61,6 +62,14 @@ const AppNavigator = () => {
           component={LandingPage}
           options={({ route }) => ({
             title: 'Vinyl Roulette',
+            headerShown: true,
+            headerStyle: {
+              backgroundColor: '#2d5a4a',
+            },
+            headerTintColor: '#f4f1eb',
+            headerTitleStyle: {
+              fontWeight: '600',
+            },
             animation:
               route.params?.transitionDirection === 'slide_from_left'
                 ? 'slide_from_left'
