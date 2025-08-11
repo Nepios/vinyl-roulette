@@ -39,7 +39,7 @@ export const QueueProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to refresh queue'
       setError(errorMessage)
-      console.error('❌ Error refreshing queue:', err)
+
     } finally {
       setLoading(false)
     }

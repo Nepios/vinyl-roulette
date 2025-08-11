@@ -61,7 +61,6 @@ export const fetchUserCollection = async (username: string): Promise<CollectionR
       headers: { ...headers },
       params: { sort: 'title', sort_order: 'asc', per_page: '100', page: page.toString() }
     })
-
     const releases = response.data.releases || []
     allReleases = allReleases.concat(releases)
     
