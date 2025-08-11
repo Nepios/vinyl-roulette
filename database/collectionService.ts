@@ -6,7 +6,7 @@ export const saveRecords = async (records: CollectionRelease[]) => {
   const db = getDB();
   db.transaction((tx) => {
     for (const rec of records) {
-      tx.executeSql(       
+      tx.executeSql(
         `INSERT INTO records (discogs_id, title, artists, year, thumb, resource_url, date_added, genres, styles, cover_image)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(discogs_id) DO UPDATE SET
