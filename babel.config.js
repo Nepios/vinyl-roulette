@@ -10,5 +10,6 @@ module.exports = {
       allowUndefined: true,
       verbose: false,
     }]
-  ]
+  ],
+  ignore: ['./shim.js']
 };

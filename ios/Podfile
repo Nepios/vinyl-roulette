@@ -36,9 +36,23 @@ target 'VinylRoulette' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['RCT_NEW_ARCH_ENABLED'] = 'NO'
+        # Enable dSYM generation for Release builds
+        if config.name == 'Release'
+          config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+        end
       end
+    end
 
-
+    # Fix Hermes dSYM issue
+    installer.pods_project.targets.each do |target|
+      if target.name == 'hermes-engine'
+        target.build_configurations.each do |config|
+          if config.name == 'Release'
+            config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+            config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
+          end
+        end
+      end
     end
   end
 end
