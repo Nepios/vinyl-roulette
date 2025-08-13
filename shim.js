@@ -16,9 +16,20 @@ if (typeof Buffer === 'undefined') global.Buffer = require('buffer').Buffer
 
 // global.location = global.location || { port: 80 }
 const isDev = typeof __DEV__ === 'boolean' && __DEV__
-process.env.NODE_ENV = isDev ? 'development' : 'production'
+if (!process.env) {
+  process.env = {}
+}
+if (isDev) {
+  process.env.NODE_ENV = 'development'
+} else {
+  process.env.NODE_ENV = 'production'
+}
 if (typeof localStorage !== 'undefined') {
-  localStorage.debug = isDev ? '*' : ''
+  if (isDev) {
+    localStorage.debug = '*'
+  } else {
+    localStorage.debug = ''
+  }
 }
 
 // If using the crypto shim, uncomment the following line to ensure
